@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
+#include <Update.h>
 
 static AsyncWebServer server(80);
 static Config* g_cfg = nullptr;
@@ -109,6 +110,37 @@ void webBegin(Config& cfg, SensorManager& sensors, bool (*onConfigChanged)()) {
     std::string out; serializeJson(d, out);
     req->send(200, "application/json", out.c_str());
   });
+
+  server.on("/update", HTTP_GET, [](AsyncWebServerRequest* req) {
+    if (!authed(req)) return;
+    req->send(200, "text/html",
+      "<html><body><h1>Firmware update</h1>"
+      "<form method='POST' action='/update' enctype='multipart/form-data'>"
+      "<input type='file' name='firmware'>"
+      "<button type='submit'>Upload</button></form></body></html>");
+  });
+
+  server.on("/update", HTTP_POST,
+    [](AsyncWebServerRequest* req) {
+      if (!authed(req)) return;
+      bool ok = !Update.hasError();
+      AsyncWebServerResponse* res = req->beginResponse(
+        ok ? 200 : 500, "text/plain", ok ? "OK, rebooting" : "Update failed");
+      res->addHeader("Connection", "close");
+      req->send(res);
+      if (ok) { delay(200); ESP.restart(); }
+    },
+    [](AsyncWebServerRequest* req, String filename, size_t index,
+       uint8_t* data, size_t len, bool final) {
+      if (!req->authenticate(g_cfg->uiUser.c_str(), g_cfg->uiPassword.c_str())) return;
+      if (index == 0) {
+        if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { Update.printError(Serial); return; }
+      }
+      if (Update.write(data, len) != len) Update.printError(Serial);
+      if (final) {
+        if (!Update.end(true)) Update.printError(Serial);
+      }
+    });
 
   server.begin();
 }
