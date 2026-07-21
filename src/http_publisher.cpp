@@ -26,6 +26,8 @@ void HttpPublisher::publish(const std::string& device, const ReadingSet& reading
   }
   HTTPClient http;
   http.begin(cfg_.httpUrl.c_str());
+  http.setConnectTimeout(4000);
+  http.setTimeout(4000);
   http.addHeader("Content-Type", contentType.c_str());
   if (!cfg_.httpAuthHeader.empty())
     http.addHeader("Authorization", cfg_.httpAuthHeader.c_str());

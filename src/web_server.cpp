@@ -96,7 +96,7 @@ void webBegin(Config& cfg, SensorManager& sensors, bool (*onConfigChanged)()) {
     if (!csrfOk(req)) { req->send(403, "text/plain", "bad origin"); return; }
     Config& c = *g_cfg;
     c.deviceName = param(req, "deviceName", c.deviceName);
-    c.publishIntervalSec = atoi(param(req, "publishIntervalSec", std::to_string(c.publishIntervalSec)).c_str());
+    { int pi = atoi(param(req, "publishIntervalSec", std::to_string(c.publishIntervalSec)).c_str()); c.publishIntervalSec = pi < 5 ? 5 : pi; }
     c.uiUser = param(req, "uiUser", c.uiUser);
     c.uiPassword = param(req, "uiPassword", c.uiPassword);
     c.mqttEnabled = param(req, "mqttEnabled", "1") == "1";
