@@ -1799,6 +1799,8 @@ Add `#include <Update.h>` at the top, and inside `webBegin(...)` (before `server
 
   server.on("/update", HTTP_POST,
     [](AsyncWebServerRequest* req) {
+      if (!authed(req)) return;   // gate the response handler too, or an
+                                  // unauthenticated bodyless POST triggers a reboot
       bool ok = !Update.hasError();
       AsyncWebServerResponse* res = req->beginResponse(
         ok ? 200 : 500, "text/plain", ok ? "OK, rebooting" : "Update failed");
@@ -1810,7 +1812,7 @@ Add `#include <Update.h>` at the top, and inside `webBegin(...)` (before `server
        uint8_t* data, size_t len, bool final) {
       if (!req->authenticate(g_cfg->uiUser.c_str(), g_cfg->uiPassword.c_str())) return;
       if (index == 0) {
-        if (!Update.begin(UPDATE_SIZE_UNKNOWN)) Update.printError(Serial);
+        if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { Update.printError(Serial); return; }
       }
       if (Update.write(data, len) != len) Update.printError(Serial);
       if (final) {
@@ -1952,6 +1954,201 @@ git commit -m "docs: add README with build, config, and OTA instructions"
 ```
 
 ---
+
+### Task 15: Essential web-UI security hardening
+
+Added after a security review of the web UI. Scope (LAN device behind basic auth):
+kill the `admin/admin` default, add CSRF protection on state-changing POSTs,
+escape HTML output, and mask password fields. HTTP basic auth stays the model.
+
+**Files:**
+- Create: `include/html_escape.h`, `src/html_escape.cpp`, `test/native/test_html_escape/test_html_escape.cpp`
+- Create: `include/csrf.h`, `src/csrf.cpp`, `test/native/test_csrf/test_csrf.cpp`
+- Modify: `platformio.ini` (add the two new sources to the native `build_src_filter`)
+- Modify: `include/config.h`, `src/config.cpp` (add guarded `randomPassword()`)
+- Modify: `src/main.cpp` (first-boot: random UI password + serial print)
+- Modify: `src/web_server.cpp` (escape values, password field type, CSRF checks)
+
+**Interfaces:**
+- `std::string htmlEscape(const std::string& in);` — escapes `& < > " '` to entities.
+- `bool originAllowed(const std::string& origin, const std::string& host);` — returns
+  `false` only when `origin` is non-empty AND its host part differs from `host`; `true`
+  otherwise (no Origin header → allow, since basic auth still gates and non-browser
+  clients omit it; a browser cross-site POST sends the attacker's Origin → mismatch → reject).
+- `std::string randomPassword();` — device-only (`#ifndef NATIVE_BUILD`), 16 chars from `esp_random()`.
+
+- [ ] **Step 1: TDD `htmlEscape` (native).** Test `test/native/test_html_escape/test_html_escape.cpp`:
+
+```cpp
+#include <unity.h>
+#include "html_escape.h"
+void test_escapes_all() {
+  TEST_ASSERT_EQUAL_STRING("a&lt;b&gt;&amp;&quot;&#39;", htmlEscape("a<b>&\"'").c_str());
+}
+void test_plain_unchanged() {
+  TEST_ASSERT_EQUAL_STRING("plain text 42", htmlEscape("plain text 42").c_str());
+}
+void setUp() {} void tearDown() {}
+int main(int, char**) { UNITY_BEGIN(); RUN_TEST(test_escapes_all); RUN_TEST(test_plain_unchanged); return UNITY_END(); }
+```
+
+Run `pio test -e native -f test_html_escape` (FAIL), then create `include/html_escape.h`:
+
+```cpp
+#pragma once
+#include <string>
+std::string htmlEscape(const std::string& in);
+```
+
+and `src/html_escape.cpp`:
+
+```cpp
+#include "html_escape.h"
+std::string htmlEscape(const std::string& in) {
+  std::string out;
+  for (char c : in) {
+    switch (c) {
+      case '&': out += "&amp;"; break;
+      case '<': out += "&lt;"; break;
+      case '>': out += "&gt;"; break;
+      case '"': out += "&quot;"; break;
+      case '\'': out += "&#39;"; break;
+      default: out += c;
+    }
+  }
+  return out;
+}
+```
+
+Run again → PASS.
+
+- [ ] **Step 2: TDD `originAllowed` (native).** Test `test/native/test_csrf/test_csrf.cpp`:
+
+```cpp
+#include <unity.h>
+#include "csrf.h"
+void test_empty_origin_allowed() { TEST_ASSERT_TRUE(originAllowed("", "dev.local")); }
+void test_same_origin_allowed() { TEST_ASSERT_TRUE(originAllowed("http://dev.local", "dev.local")); }
+void test_same_origin_with_port() { TEST_ASSERT_TRUE(originAllowed("http://dev.local:80", "dev.local:80")); }
+void test_cross_origin_rejected() { TEST_ASSERT_FALSE(originAllowed("http://evil.com", "dev.local")); }
+void setUp() {} void tearDown() {}
+int main(int, char**) { UNITY_BEGIN();
+  RUN_TEST(test_empty_origin_allowed); RUN_TEST(test_same_origin_allowed);
+  RUN_TEST(test_same_origin_with_port); RUN_TEST(test_cross_origin_rejected); return UNITY_END(); }
+```
+
+Run `pio test -e native -f test_csrf` (FAIL), then create `include/csrf.h`:
+
+```cpp
+#pragma once
+#include <string>
+bool originAllowed(const std::string& origin, const std::string& host);
+```
+
+and `src/csrf.cpp`:
+
+```cpp
+#include "csrf.h"
+static std::string originHost(const std::string& origin) {
+  auto p = origin.find("://");
+  if (p == std::string::npos) return origin;
+  std::string rest = origin.substr(p + 3);
+  auto slash = rest.find('/');
+  if (slash != std::string::npos) rest = rest.substr(0, slash);
+  return rest;
+}
+bool originAllowed(const std::string& origin, const std::string& host) {
+  if (origin.empty()) return true;
+  return originHost(origin) == host;
+}
+```
+
+Run again → PASS.
+
+- [ ] **Step 3: add both sources to the native `build_src_filter`** in `platformio.ini` `[env:native]`:
+
+```
+    +<html_escape.cpp>
+    +<csrf.cpp>
+```
+
+- [ ] **Step 4: `randomPassword()` (device-only).** In `include/config.h`, inside the existing `#ifndef NATIVE_BUILD` block, add:
+
+```cpp
+std::string randomPassword();
+```
+
+In `src/config.cpp`, inside the existing `#ifndef NATIVE_BUILD` block, add `#include <esp_random.h>` with the other includes and:
+
+```cpp
+std::string randomPassword() {
+  static const char* cs = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  std::string s;
+  for (int i = 0; i < 16; i++) s += cs[esp_random() % 55];
+  return s;
+}
+```
+
+- [ ] **Step 5: first-boot random password** in `src/main.cpp`. Replace the first-boot branch (from Task 11) so a fresh device gets a random UI password printed once over serial:
+
+```cpp
+  if (!configLoad(cfg)) {
+    cfg.deviceName = defaultDeviceName();
+    cfg.uiPassword = randomPassword();
+    configSave(cfg);
+    Serial.printf("First boot: web UI user='%s' password='%s' (change it in the config page)\n",
+                  cfg.uiUser.c_str(), cfg.uiPassword.c_str());
+  }
+```
+
+- [ ] **Step 6: escape output + mask passwords + CSRF checks** in `src/web_server.cpp`.
+  Add `#include "html_escape.h"` and `#include "csrf.h"`. Change `field()` to escape the value and gain a password flag:
+
+```cpp
+static String field(const char* label, const char* name, const std::string& val,
+                    bool isPassword = false) {
+  return "<label>" + String(label) + ": <input " +
+         (isPassword ? "type='password' " : "") + "name='" + name + "' value='" +
+         String(htmlEscape(val).c_str()) + "'></label><br>";
+}
+```
+
+  Pass `true` for the password fields in `configHtml()`: `uiPassword`, `mqttPassword`,
+  `httpAuthHeader`. In `statusHtml()`, wrap dynamic values with `htmlEscape(...)` before
+  building the `String` (device name, sensor names, units). Add a CSRF helper and apply it:
+
+```cpp
+static bool csrfOk(AsyncWebServerRequest* req) {
+  std::string origin = req->hasHeader("Origin") ? req->getHeader("Origin")->value().c_str() : "";
+  std::string host = req->hasHeader("Host") ? req->getHeader("Host")->value().c_str() : "";
+  return originAllowed(origin, host);
+}
+```
+
+  In `POST /config` (after `authed`) and in the `POST /update` response handler (after `authed`):
+
+```cpp
+    if (!csrfOk(req)) { req->send(403, "text/plain", "bad origin"); return; }
+```
+
+  In the `POST /update` body/upload callback, at `index == 0` (after the existing auth check,
+  before `Update.begin`):
+
+```cpp
+      if (!csrfOk(req)) return;
+```
+
+- [ ] **Step 7: verify.** `pio test -e native` → 16/16 (adds html_escape + csrf tests).
+  `pio run -e esp32-poe-iso` → SUCCESS. (On-device UI checks remain DEFERRED.)
+
+- [ ] **Step 8: commit**
+
+```bash
+git add include/html_escape.h src/html_escape.cpp test/native/test_html_escape/test_html_escape.cpp \
+        include/csrf.h src/csrf.cpp test/native/test_csrf/test_csrf.cpp \
+        platformio.ini include/config.h src/config.cpp src/main.cpp src/web_server.cpp
+git commit -m "feat: essential web-UI security hardening (random default password, CSRF, escaping)"
+```
 
 ## Self-Review Notes
 
