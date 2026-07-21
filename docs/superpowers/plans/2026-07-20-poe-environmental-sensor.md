@@ -1838,11 +1838,15 @@ Add a global:
 bool markedValid = false;
 ```
 
-In `setup()`, after `Serial.begin`, start a 30 s task watchdog:
+In `setup()`, after `Serial.begin`, start a 30 s task watchdog. On arduino-esp32
+core 3.x the TWDT is already initialized at boot (default 5 s), so a second
+`esp_task_wdt_init()` returns `ESP_ERR_INVALID_STATE` without changing the
+timeout — reconfigure in that case, or the loop ends up on the 5 s default and a
+blocking reconnect trips a reboot loop:
 
 ```cpp
   esp_task_wdt_config_t wdt = { .timeout_ms = 30000, .idle_core_mask = 0, .trigger_panic = true };
-  esp_task_wdt_init(&wdt);
+  if (esp_task_wdt_init(&wdt) == ESP_ERR_INVALID_STATE) esp_task_wdt_reconfigure(&wdt);
   esp_task_wdt_add(NULL);
 ```
 
