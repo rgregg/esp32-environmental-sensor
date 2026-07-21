@@ -109,6 +109,11 @@ board = esp32-poe-iso
 framework = arduino
 board_build.partitions = partitions.csv
 board_build.filesystem = littlefs
+; The PlatformIO esp32-poe-iso board defaults to 4MB flash; the -16MB hardware
+; and our partition table need the image header to declare 16MB, or the second
+; OTA slot and LittleFS (both above 4MB) fail to map at runtime.
+board_upload.flash_size = 16MB
+board_upload.maximum_size = 16777216
 monitor_speed = 115200
 build_flags =
     -DCORE_DEBUG_LEVEL=3
