@@ -128,6 +128,11 @@ lib_deps =
 [env:native]
 platform = native
 test_framework = unity
+; Compile the project's src/ files into the test firmware (PlatformIO does NOT
+; do this by default). Combined with build_src_filter below, only the
+; framework-agnostic sources are pulled into host tests — no need to duplicate
+; any .cpp into the test directory.
+test_build_src = yes
 build_flags =
     -std=gnu++17
     -I include
@@ -453,7 +458,7 @@ Config configFromJson(const std::string& json) {
 }
 ```
 
-Note: `test/native` builds `src/config.cpp` automatically (PlatformIO compiles `src/` into the test firmware). ArduinoJson's `operator|` on `std::string` returns the default when the key is missing.
+Note: the `native` env sets `test_build_src = yes` (Task 1), so PlatformIO compiles `src/config.cpp` into the test firmware — do NOT copy `config.cpp` into the test directory. ArduinoJson's `operator|` on `std::string` returns the default when the key is missing.
 
 - [ ] **Step 5: Run test to verify it passes**
 
