@@ -33,4 +33,5 @@ Config configFromJson(const std::string& json);
 bool configLoad(Config& out);
 bool configSave(const Config& cfg);
 std::string defaultDeviceName();
+std::string randomPassword();
 #endif

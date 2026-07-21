@@ -28,7 +28,10 @@ void setup() {
   esp_task_wdt_add(NULL);
   if (!configLoad(cfg)) {
     cfg.deviceName = defaultDeviceName();
-    configSave(cfg);                 // write defaults on first boot
+    cfg.uiPassword = randomPassword();
+    configSave(cfg);
+    Serial.printf("First boot: web UI user='%s' password='%s' (change it in the config page)\n",
+                  cfg.uiUser.c_str(), cfg.uiPassword.c_str());
   }
   if (cfg.deviceName.empty()) cfg.deviceName = defaultDeviceName();
   netBegin(cfg.deviceName);

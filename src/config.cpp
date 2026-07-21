@@ -56,6 +56,8 @@ Config configFromJson(const std::string& json) {
 #include <Arduino.h>
 #include <LittleFS.h>
 #include <esp_mac.h>
+#include <esp_random.h>
+#include <cstring>
 
 static bool ensureFs() {
   return LittleFS.begin(true);   // format on fail
@@ -89,5 +91,13 @@ std::string defaultDeviceName() {
   char buf[24];
   snprintf(buf, sizeof(buf), "esp32-env-%02x%02x%02x", mac[3], mac[4], mac[5]);
   return std::string(buf);
+}
+
+std::string randomPassword() {
+  static const char* cs = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const size_t n = strlen(cs);
+  std::string s;
+  for (int i = 0; i < 16; i++) s += cs[esp_random() % n];
+  return s;
 }
 #endif
