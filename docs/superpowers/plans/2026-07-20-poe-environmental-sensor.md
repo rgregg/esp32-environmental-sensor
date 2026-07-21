@@ -122,6 +122,14 @@ board_upload.maximum_size = 16777216
 monitor_speed = 115200
 build_flags =
     -DCORE_DEBUG_LEVEL=3
+; Re-enable the ESP32's hardware atomics (S32C1I). pioarduino's default adds
+; -mdisable-hardware-atomics, making GCC emit external __atomic_*_{1,2,4} calls
+; that the classic-esp32 precompiled libs don't provide; C++ std::shared_ptr
+; (via NetworkClient/PubSubClient) then fails to link. This board is a dual-core
+; ESP32 without PSRAM, where hardware atomics are correct and ESP-IDF's default.
+; (Discovered at Task 9; required for any task that links NetworkClient.)
+build_unflags =
+    -mdisable-hardware-atomics
 lib_deps =
     bblanchon/ArduinoJson@^7.1.0
     adafruit/Adafruit BME280 Library@^2.2.4
