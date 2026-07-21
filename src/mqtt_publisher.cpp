@@ -40,7 +40,7 @@ void MqttPublisher::publishDiscovery(const std::string& device, const ReadingSet
 
 void MqttPublisher::publish(const std::string& device, const ReadingSet& readings) {
   if (!cfg_.mqttEnabled || !client_.connected()) return;
-  if (cfg_.mqttDiscovery && !discoverySent_) publishDiscovery(device, readings);
+  if (cfg_.mqttDiscovery && !discoverySent_ && !readings.empty()) publishDiscovery(device, readings);
   for (const auto& r : readings) {
     std::string topic = stateTopic(cfg_.mqttBaseTopic, device, r.name);
     char val[32];

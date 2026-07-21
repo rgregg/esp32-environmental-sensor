@@ -24,8 +24,7 @@ void setup() {
   Serial.begin(115200);
   delay(200);
   esp_task_wdt_config_t wdt = { .timeout_ms = 30000, .idle_core_mask = 0, .trigger_panic = true };
-  esp_task_wdt_init(&wdt);
-  esp_task_wdt_add(NULL);
+  esp_task_wdt_reconfigure(&wdt);
   if (!configLoad(cfg)) {
     cfg.deviceName = defaultDeviceName();
     cfg.uiPassword = randomPassword();
@@ -35,6 +34,7 @@ void setup() {
   }
   if (cfg.deviceName.empty()) cfg.deviceName = defaultDeviceName();
   netBegin(cfg.deviceName);
+  esp_task_wdt_add(NULL);
   sensors.begin();
   mqtt.configure(cfg);
   httpPub.configure(cfg);
@@ -48,7 +48,8 @@ void loop() {
   esp_task_wdt_reset();
   sensors.poll();
   mqtt.loop();
-  if (millis() - lastPublish > cfg.publishIntervalSec * 1000UL) {
+  uint32_t intervalSec = cfg.publishIntervalSec ? cfg.publishIntervalSec : 30;
+  if (millis() - lastPublish > intervalSec * 1000UL) {
     lastPublish = millis();
     mqtt.publish(cfg.deviceName, sensors.snapshot());
     httpPub.publish(cfg.deviceName, sensors.snapshot());
