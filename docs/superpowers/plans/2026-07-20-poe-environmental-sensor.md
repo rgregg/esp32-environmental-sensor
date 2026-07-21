@@ -126,9 +126,19 @@ test_framework = unity
 build_flags =
     -std=gnu++17
     -I include
+; Only the framework-agnostic sources compile on the host. Arduino-only
+; sources (net.cpp, sensors, publishers, web_server.cpp) are excluded so
+; `pio test -e native` keeps working as those files are added in later tasks.
+build_src_filter =
+    -<*>
+    +<config.cpp>
+    +<influx_format.cpp>
+    +<mqtt_format.cpp>
 lib_deps =
     bblanchon/ArduinoJson@^7.1.0
 ```
+
+Note: `-DNATIVE_BUILD` is added to this env's `build_flags` in Task 11 (guards the LittleFS code in `config.cpp`). The `build_src_filter` above lists source files that don't exist until later tasks; PlatformIO silently ignores absent matches, so this is safe from Task 1 on.
 
 - [ ] **Step 4: Create `include/.gitkeep`** (empty file, keeps dir in git)
 
