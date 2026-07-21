@@ -51,3 +51,43 @@ Config configFromJson(const std::string& json) {
   c.httpAuthHeader = d["httpAuthHeader"] | c.httpAuthHeader;
   return c;
 }
+
+#ifndef NATIVE_BUILD
+#include <Arduino.h>
+#include <LittleFS.h>
+#include <esp_mac.h>
+
+static bool ensureFs() {
+  return LittleFS.begin(true);   // format on fail
+}
+
+bool configLoad(Config& out) {
+  if (!ensureFs()) return false;
+  if (!LittleFS.exists("/config.json")) return false;
+  File f = LittleFS.open("/config.json", "r");
+  if (!f) return false;
+  std::string json;
+  while (f.available()) json += (char)f.read();
+  f.close();
+  out = configFromJson(json);
+  return true;
+}
+
+bool configSave(const Config& cfg) {
+  if (!ensureFs()) return false;
+  File f = LittleFS.open("/config.json", "w");
+  if (!f) return false;
+  std::string json = configToJson(cfg);
+  f.print(json.c_str());
+  f.close();
+  return true;
+}
+
+std::string defaultDeviceName() {
+  uint8_t mac[6];
+  esp_read_mac(mac, ESP_MAC_ETH);
+  char buf[24];
+  snprintf(buf, sizeof(buf), "esp32-env-%02x%02x%02x", mac[3], mac[4], mac[5]);
+  return std::string(buf);
+}
+#endif

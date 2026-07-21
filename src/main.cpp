@@ -13,17 +13,14 @@ uint32_t lastPublish = 0;
 void setup() {
   Serial.begin(115200);
   delay(200);
-  cfg.deviceName = "test";
-  // cfg.mqttHost intentionally left unset here: real config comes from
-  // LittleFS in Task 11. MqttPublisher::reconnect() no-ops when mqttHost
-  // is empty, so this compiles and is functionally inert until then.
-  netBegin(("esp32-env-" + cfg.deviceName).c_str());
+  if (!configLoad(cfg)) {
+    cfg.deviceName = defaultDeviceName();
+    configSave(cfg);                 // write defaults on first boot
+  }
+  if (cfg.deviceName.empty()) cfg.deviceName = defaultDeviceName();
+  netBegin(cfg.deviceName);
   sensors.begin();
   mqtt.configure(cfg);
-  // cfg.httpEnabled/httpUrl intentionally left unset here: real config comes
-  // from LittleFS in Task 11. HttpPublisher::publish() early-returns when
-  // httpEnabled is false or httpUrl is empty, so this compiles and is
-  // functionally inert until then.
   httpPub.configure(cfg);
   auto det = sensors.detected();
   Serial.printf("Detected %u sensor(s)\n", (unsigned)det.size());

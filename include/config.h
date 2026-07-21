@@ -28,3 +28,9 @@ struct Config {
 
 std::string configToJson(const Config& c);
 Config configFromJson(const std::string& json);
+
+#ifndef NATIVE_BUILD
+bool configLoad(Config& out);
+bool configSave(const Config& cfg);
+std::string defaultDeviceName();
+#endif
