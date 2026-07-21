@@ -104,7 +104,12 @@ spiffs,   data, spiffs,  0xc90000, 0x360000,
 default_envs = esp32-poe-iso
 
 [env:esp32-poe-iso]
-platform = espressif32
+; Pinned to the pioarduino platform for arduino-esp32 core 3.x (ESP-IDF 5.x),
+; per the design's Tech Stack. The official PlatformIO espressif32 platform is
+; stuck on core 2.0.17 (ESP-IDF 4.4), and the firmware uses 3.x APIs
+; (Network.onEvent, NetworkClient). A bare `platform = espressif32` is ambiguous
+; when both platforms are installed; this pin makes the core-3.x build reproducible.
+platform = https://github.com/pioarduino/platform-espressif32/releases/download/55.03.37/platform-espressif32.zip
 board = esp32-poe-iso
 framework = arduino
 board_build.partitions = partitions.csv
