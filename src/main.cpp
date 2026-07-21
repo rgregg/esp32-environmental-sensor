@@ -1,19 +1,23 @@
 #include <Arduino.h>
 #include "net.h"
+#include "sensor_manager.h"
+
+SensorManager sensors;
 
 void setup() {
   Serial.begin(115200);
   delay(200);
-  Serial.println("esp32-environmental-sensor: boot");
-  if (netBegin("esp32-env-test")) {
-    Serial.printf("Ethernet up, IP=%s\n", netIp().c_str());
-    Serial.println("mDNS: esp32-env-test.local");
-  } else {
-    Serial.println("Ethernet FAILED to get IP");
-  }
+  netBegin("esp32-env-test");
+  sensors.begin();
+  auto det = sensors.detected();
+  Serial.printf("Detected %u sensor(s)\n", (unsigned)det.size());
+  for (auto& d : det) Serial.printf("  - %s\n", d.c_str());
 }
 
 void loop() {
+  sensors.poll();
+  for (const auto& r : sensors.snapshot())
+    Serial.printf("%s=%.2f %s\n", r.name.c_str(), r.value, r.unit.c_str());
+  Serial.println("---");
   delay(5000);
-  Serial.printf("link=%d ip=%s\n", netConnected(), netIp().c_str());
 }
