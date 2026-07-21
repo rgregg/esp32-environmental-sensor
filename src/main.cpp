@@ -2,9 +2,11 @@
 #include "net.h"
 #include "sensor_manager.h"
 #include "mqtt_publisher.h"
+#include "http_publisher.h"
 
 SensorManager sensors;
 MqttPublisher mqtt;
+HttpPublisher httpPub;
 Config cfg;
 uint32_t lastPublish = 0;
 
@@ -18,6 +20,11 @@ void setup() {
   netBegin(("esp32-env-" + cfg.deviceName).c_str());
   sensors.begin();
   mqtt.configure(cfg);
+  // cfg.httpEnabled/httpUrl intentionally left unset here: real config comes
+  // from LittleFS in Task 11. HttpPublisher::publish() early-returns when
+  // httpEnabled is false or httpUrl is empty, so this compiles and is
+  // functionally inert until then.
+  httpPub.configure(cfg);
   auto det = sensors.detected();
   Serial.printf("Detected %u sensor(s)\n", (unsigned)det.size());
   for (auto& d : det) Serial.printf("  - %s\n", d.c_str());
@@ -29,8 +36,9 @@ void loop() {
     lastPublish = millis();
     sensors.poll();
     mqtt.publish(cfg.deviceName, sensors.snapshot());
-    Serial.printf("published %u readings, mqtt=%d\n",
-      (unsigned)sensors.snapshot().size(), mqtt.connected());
+    httpPub.publish(cfg.deviceName, sensors.snapshot());
+    Serial.printf("published %u readings, mqtt=%d, http=%d\n",
+      (unsigned)sensors.snapshot().size(), mqtt.connected(), httpPub.connected());
   }
   delay(50);
 }
