@@ -28,9 +28,12 @@ void setup() {
   if (!configLoad(cfg)) {
     cfg.deviceName = defaultDeviceName();
     cfg.uiPassword = randomPassword();
+    cfg.apiToken = randomPassword();
     configSave(cfg);
     Serial.printf("First boot: web UI user='%s' password='%s' (change it in the config page)\n",
                   cfg.uiUser.c_str(), cfg.uiPassword.c_str());
+    Serial.printf("First boot: API token='%s' (use as 'Authorization: Bearer <token>')\n",
+                  cfg.apiToken.c_str());
   }
   if (cfg.deviceName.empty()) cfg.deviceName = defaultDeviceName();
   netBegin(cfg.deviceName);
