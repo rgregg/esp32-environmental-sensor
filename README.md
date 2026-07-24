@@ -103,6 +103,31 @@ Known limitations (deliberately out of scope):
   mismatch, so this covers the practical CSRF vector; closing the gap entirely
   would require a CSRF token (not implemented in this scope).
 
+## Hardening & deployment
+
+The device is designed for a **trusted, segmented network**. Recommended
+deployment hardening:
+
+- **Network segmentation (most important).** Put the sensor on an isolated IoT
+  VLAN/subnet whose egress is limited to its MQTT/HTTP targets plus DHCP/DNS.
+  This is the primary defense against a compromised device pivoting onto the
+  rest of your network — firmware cannot substitute for it.
+- **No call-home.** The device makes no outbound connections beyond its
+  configured MQTT/HTTP publishers (no NTP, telemetry, or update-check), and
+  serves only on its Ethernet interface.
+
+Built-in protections:
+
+- **Login lockout.** After 5 failed logins from one IP, that IP is blocked for
+  60 seconds (`429 Too Many Requests`), throttling online password guessing.
+- **API token for automation.** A random token is generated on first boot
+  (printed once on serial alongside the password). Scripts authenticate with
+  `Authorization: Bearer <token>` instead of the admin password. Regenerate it
+  on the config page to revoke it; regenerating does not change the password.
+- **OTA off by default.** Firmware upload (`/update`) returns `403` unless you
+  enable it on the config page. It auto-disables again after a successful
+  update, so the attack surface is only open while you are actively updating.
+
 ## Tests
 
 Host-side unit tests cover the framework-agnostic logic (config JSON round-trip,
