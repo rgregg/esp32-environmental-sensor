@@ -93,7 +93,13 @@ static String configHtml() {
   h += field("URL", "httpUrl", c.httpUrl);
   h += field("Format (influx/json)", "httpFormat", c.httpFormat);
   h += field("Auth header", "httpAuthHeader", c.httpAuthHeader, true);
-  h += "<br><button type='submit'>Save</button></form></body></html>";
+  h += "<h3>Security</h3>";
+  h += field("OTA enabled (0/1)", "otaEnabled", c.otaEnabled ? "1" : "0");
+  h += field("API token", "apiToken", c.apiToken, true);
+  h += "<br><button type='submit'>Save</button></form>";
+  h += "<form method='POST' action='/regen-token'>"
+       "<button type='submit'>Regenerate API token</button></form>";
+  h += "</body></html>";
   return h;
 }
 
@@ -140,8 +146,18 @@ void webBegin(Config& cfg, SensorManager& sensors, bool (*onConfigChanged)()) {
     c.httpUrl = param(req, "httpUrl", c.httpUrl);
     c.httpFormat = param(req, "httpFormat", c.httpFormat);
     c.httpAuthHeader = param(req, "httpAuthHeader", c.httpAuthHeader);
+    c.otaEnabled = param(req, "otaEnabled", c.otaEnabled ? "1" : "0") == "1";
+    c.apiToken = param(req, "apiToken", c.apiToken);
     configSave(c);
     if (g_onChange) g_onChange();
+    req->redirect("/config");
+  });
+
+  server.on("/regen-token", HTTP_POST, [](AsyncWebServerRequest* req) {
+    if (!authed(req)) return;
+    if (!csrfOk(req)) { req->send(403, "text/plain", "bad origin"); return; }
+    g_cfg->apiToken = randomPassword();
+    configSave(*g_cfg);
     req->redirect("/config");
   });
 
