@@ -2,6 +2,8 @@
 #include "net.h"
 #include "html_escape.h"
 #include "csrf.h"
+#include "rate_limiter.h"
+#include "secure_compare.h"
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
@@ -11,13 +13,41 @@ static AsyncWebServer server(80);
 static Config* g_cfg = nullptr;
 static SensorManager* g_sensors = nullptr;
 static bool (*g_onChange)() = nullptr;
+static RateLimiter g_rl;
+
+// Returns the token from an "Authorization: Bearer <token>" header, or "".
+static std::string bearerToken(AsyncWebServerRequest* req) {
+  if (!req->hasHeader("Authorization")) return "";
+  std::string h = req->getHeader("Authorization")->value().c_str();
+  const std::string prefix = "Bearer ";
+  if (h.rfind(prefix, 0) != 0) return "";
+  return h.substr(prefix.size());
+}
 
 static bool authed(AsyncWebServerRequest* req) {
-  if (!req->authenticate(g_cfg->uiUser.c_str(), g_cfg->uiPassword.c_str())) {
-    req->requestAuthentication();
+  uint32_t ip = req->client() ? (uint32_t)req->client()->remoteIP() : 0;
+  uint32_t now = millis();
+  if (!g_rl.allowed(ip, now)) {
+    req->send(429, "text/plain", "too many attempts");
     return false;
   }
-  return true;
+  std::string tok = bearerToken(req);
+  if (!tok.empty()) {
+    if (!g_cfg->apiToken.empty() && constantTimeEquals(tok, g_cfg->apiToken)) {
+      g_rl.recordSuccess(ip);
+      return true;
+    }
+    g_rl.recordFailure(ip, now);
+    req->send(401, "text/plain", "invalid token");
+    return false;
+  }
+  if (req->authenticate(g_cfg->uiUser.c_str(), g_cfg->uiPassword.c_str())) {
+    g_rl.recordSuccess(ip);
+    return true;
+  }
+  g_rl.recordFailure(ip, now);
+  req->requestAuthentication();
+  return false;
 }
 
 static String statusHtml() {
