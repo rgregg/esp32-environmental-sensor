@@ -24,6 +24,15 @@ static std::string bearerToken(AsyncWebServerRequest* req) {
   return h.substr(prefix.size());
 }
 
+// True if the request carries valid credentials: a matching Bearer API token
+// (when one is configured) or valid basic auth. No side effects.
+static bool credentialsOk(AsyncWebServerRequest* req) {
+  std::string tok = bearerToken(req);
+  if (!tok.empty())
+    return !g_cfg->apiToken.empty() && constantTimeEquals(tok, g_cfg->apiToken);
+  return req->authenticate(g_cfg->uiUser.c_str(), g_cfg->uiPassword.c_str());
+}
+
 static bool authed(AsyncWebServerRequest* req) {
   uint32_t ip = req->client() ? (uint32_t)req->client()->remoteIP() : 0;
   uint32_t now = millis();
@@ -31,22 +40,13 @@ static bool authed(AsyncWebServerRequest* req) {
     req->send(429, "text/plain", "too many attempts");
     return false;
   }
-  std::string tok = bearerToken(req);
-  if (!tok.empty()) {
-    if (!g_cfg->apiToken.empty() && constantTimeEquals(tok, g_cfg->apiToken)) {
-      g_rl.recordSuccess(ip);
-      return true;
-    }
-    g_rl.recordFailure(ip, now);
-    req->send(401, "text/plain", "invalid token");
-    return false;
-  }
-  if (req->authenticate(g_cfg->uiUser.c_str(), g_cfg->uiPassword.c_str())) {
+  if (credentialsOk(req)) {
     g_rl.recordSuccess(ip);
     return true;
   }
   g_rl.recordFailure(ip, now);
-  req->requestAuthentication();
+  if (!bearerToken(req).empty()) req->send(401, "text/plain", "invalid token");
+  else req->requestAuthentication();
   return false;
 }
 
@@ -198,7 +198,7 @@ void webBegin(Config& cfg, SensorManager& sensors, bool (*onConfigChanged)()) {
     },
     [](AsyncWebServerRequest* req, String filename, size_t index,
        uint8_t* data, size_t len, bool final) {
-      if (!req->authenticate(g_cfg->uiUser.c_str(), g_cfg->uiPassword.c_str())) return;
+      if (!credentialsOk(req)) return;
       if (!g_cfg->otaEnabled) return;
       if (index == 0) {
         if (!csrfOk(req)) return;
