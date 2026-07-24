@@ -155,6 +155,7 @@ void webBegin(Config& cfg, SensorManager& sensors, bool (*onConfigChanged)()) {
 
   server.on("/update", HTTP_GET, [](AsyncWebServerRequest* req) {
     if (!authed(req)) return;
+    if (!g_cfg->otaEnabled) { req->send(403, "text/plain", "OTA disabled"); return; }
     req->send(200, "text/html",
       "<html><body><h1>Firmware update</h1>"
       "<form method='POST' action='/update' enctype='multipart/form-data'>"
@@ -166,16 +167,23 @@ void webBegin(Config& cfg, SensorManager& sensors, bool (*onConfigChanged)()) {
     [](AsyncWebServerRequest* req) {
       if (!authed(req)) return;
       if (!csrfOk(req)) { req->send(403, "text/plain", "bad origin"); return; }
+      if (!g_cfg->otaEnabled) { req->send(403, "text/plain", "OTA disabled"); return; }
       bool ok = !Update.hasError();
       AsyncWebServerResponse* res = req->beginResponse(
         ok ? 200 : 500, "text/plain", ok ? "OK, rebooting" : "Update failed");
       res->addHeader("Connection", "close");
       req->send(res);
-      if (ok) { delay(200); ESP.restart(); }
+      if (ok) {
+        g_cfg->otaEnabled = false;   // one-shot: new image boots with OTA disabled
+        configSave(*g_cfg);
+        delay(200);
+        ESP.restart();
+      }
     },
     [](AsyncWebServerRequest* req, String filename, size_t index,
        uint8_t* data, size_t len, bool final) {
       if (!req->authenticate(g_cfg->uiUser.c_str(), g_cfg->uiPassword.c_str())) return;
+      if (!g_cfg->otaEnabled) return;
       if (index == 0) {
         if (!csrfOk(req)) return;
         if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { Update.printError(Serial); return; }
