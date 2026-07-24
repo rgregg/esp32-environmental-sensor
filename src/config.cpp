@@ -21,6 +21,8 @@ std::string configToJson(const Config& c) {
   d["httpUrl"] = c.httpUrl;
   d["httpFormat"] = c.httpFormat;
   d["httpAuthHeader"] = c.httpAuthHeader;
+  d["otaEnabled"] = c.otaEnabled;
+  d["apiToken"] = c.apiToken;
   std::string out;
   serializeJson(d, out);
   return out;
@@ -49,6 +51,8 @@ Config configFromJson(const std::string& json) {
   c.httpUrl = d["httpUrl"] | c.httpUrl;
   c.httpFormat = d["httpFormat"] | c.httpFormat;
   c.httpAuthHeader = d["httpAuthHeader"] | c.httpAuthHeader;
+  c.otaEnabled = d["otaEnabled"] | c.otaEnabled;
+  c.apiToken = d["apiToken"] | c.apiToken;
   return c;
 }
 

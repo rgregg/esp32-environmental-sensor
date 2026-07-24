@@ -24,6 +24,9 @@ struct Config {
   std::string httpUrl;
   std::string httpFormat = "influx";  // "influx" | "json"
   std::string httpAuthHeader;
+
+  bool otaEnabled = false;
+  std::string apiToken;
 };
 
 std::string configToJson(const Config& c);
