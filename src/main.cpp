@@ -36,7 +36,12 @@ void setup() {
                   cfg.apiToken.c_str());
   }
   if (cfg.deviceName.empty()) cfg.deviceName = defaultDeviceName();
-  netBegin(cfg.deviceName);
+  bool netUp = netBegin(cfg.deviceName);
+  if (netUp) {
+    Serial.printf("Network up: http://%s/  (%s.local)\n", netIp().c_str(), cfg.deviceName.c_str());
+  } else {
+    Serial.println("Network DOWN: no DHCP lease (check Ethernet link)");
+  }
   esp_task_wdt_add(NULL);
   sensors.begin();
   mqtt.configure(cfg);
