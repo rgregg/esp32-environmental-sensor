@@ -120,3 +120,49 @@ For Tasks 6-13: implement the code, verify via DEVICE COMPILE (`pio run -e esp32
 - All native-TDD tasks: RED phase shows "skipped" not hard-fail (PIO artifact).
 - Task 6 (net.cpp): ARDUINO_EVENT_ETH_LOST_IP not handled -> stale "connected" after DHCP lease loss w/o link drop (inherited from plan). main.cpp prints mDNS-up line even if MDNS.begin() failed (cosmetic).
 - Task 6: hostname hardcoded "esp32-env-test"; will be wired to cfg.deviceName in Task 11 (expected).
+
+=== ON-DEVICE BENCH VERIFICATION — COMPLETED 2026-07-24 (all deferred checks resolved) ===
+Hardware: Olimex ESP32-POE-ISO, ESP32-D0WD-V3 rev3.1, 16MB flash (CONFIRMED - validates the
+board_upload.flash_size=16MB fix). Base MAC 04:83:08:b6:b1:fc; ETH MAC ...b1:ff.
+Access: board on USB-serial /dev/ttyUSB0 (CH340) of piserial5.lan; flashed via esptool over ssh.
+Device on LAN at 10.0.1.93, name esp32-env-b6b1ff.
+
+VERIFIED PASS:
+- Task 6 Ethernet/DHCP: link up, DHCP lease 10.0.1.93. mDNS: raw query from same-L2 host resolved
+  esp32-env-b6b1ff.local -> 10.0.1.93. (mDNS fails from a DIFFERENT subnet - multicast doesn't route;
+  that is expected, not a device fault.)
+- Task 7 BME280: "Detected 1 sensor(s) - BME280"; I2C sda=13 scl=16; live plausible readings
+  (21.5 C / 40.6 %RH / 1008.7 hPa). Pa->hPa conversion correct. 30s CCS811 re-probe fires exactly
+  on schedule (6.7/36.7/66.7s) - hot-plug logic works.
+- Task 11 config persistence: first boot created config + printed random creds; after reboot no
+  "First boot" line and settings/password persisted. Survives reflash (LittleFS partition intact).
+- Task 12 web UI + auth: unauth 401, wrong pw 401, correct pw 200 w/ live readings; /api/readings JSON.
+- Task 13 OTA: full round trip TWICE via POST /update. otadata alternated ota_0 -> ota_1 -> ota_0
+  (partition switch proven); marker build proved NEW code ran; one-shot re-disable set otaEnabled=0
+  after each update; "OTA image marked valid" observed on the new image.
+- Hardening: CSRF cross-origin POST /config -> 403 "bad origin" AND deviceName unchanged (blocked
+  before mutation). OTA disabled by default -> /update 403. Bearer API token 200, bad token 401.
+  Rate limiter: 5 fails then 429; correct pw still 429 while locked; PER-IP isolation confirmed
+  (other IP still 200). publishIntervalSec=0 clamped to 5 (final-review fix works on hardware).
+
+*** CRITICAL FIX PROVEN ON HARDWARE ***
+The final review's watchdog finding was REAL: the pre-fix firmware's serial showed
+"E task_wdt: esp_task_wdt_init(517): TWDT already initialized" (init was a silent no-op).
+Empirical test on the fixed build: blocked the loop 10s WITHOUT feeding the WDT -> device SURVIVED
+("WDT-TEST: SURVIVED 10s"). Under the broken 5s default it would have panicked/rebooted.
+=> esp_task_wdt_reconfigure() fallback genuinely applies the 30s timeout. No reboot loop.
+NOTE: the "TWDT already initialized" ERROR LINE STILL PRINTS on every boot - that is IDF logging the
+failed first call before returning ESP_ERR_INVALID_STATE; it is expected and NOT a failure.
+
+NEW MINOR FOUND ON HARDWARE (not previously logged):
+- POST /config: mqttEnabled/mqttDiscovery/httpEnabled use HARDCODED defaults ("1","1","0") instead of
+  the current value, unlike otaEnabled which correctly defaults to current. A PARTIAL/scripted POST
+  silently flips those three. Browser forms always submit all fields so the UI is unaffected; it is a
+  footgun for API/script users. Suggested fix: default each to its current value.
+- LittleFS mount errors are printed on a blank/erased FS before format-on-fail recovers (noisy but works).
+- Firmware never prints its IP over serial -> had to find the device via ARP/mDNS. Consider printing
+  IP + device name after netBegin for field diagnostics.
+
+STILL DEFERRED: Task 8 CCS811 (MOD-ENV still not attached - "Detected 1 sensor(s)" confirms absence
+handled gracefully); Task 9/10 live MQTT broker + InfluxDB endpoint tests (none configured on bench).
+Board left running clean HEAD build, OTA disabled (secure default), config/creds preserved.
