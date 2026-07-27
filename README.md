@@ -1,5 +1,7 @@
 # ESP32 PoE Environmental Sensor
 
+[![CI](https://github.com/rgregg/esp32-environmental-sensor/actions/workflows/ci.yml/badge.svg)](https://github.com/rgregg/esp32-environmental-sensor/actions/workflows/ci.yml)
+
 Firmware for an **Olimex ESP32-POE-ISO-16MB** that reads Olimex I2C environmental
 sensor modules and publishes readings to MQTT and/or HTTP (InfluxDB line protocol
 or a JSON webhook). It is configured and updated entirely over the network — no
