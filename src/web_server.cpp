@@ -239,12 +239,13 @@ static void sendConfig(AsyncWebServerRequest* req) {
 
   r->print(F("</fieldset><fieldset><legend>security</legend><div class='row'>"));
   boolField(r, "OTA uploads", "otaEnabled", c.otaEnabled);
-  txtField(r, "API token", "apiToken", c.apiToken, true);
-  r->print(F("</div></fieldset><div class='bar'><button type='submit'>Save</button></div></form>"
-             "<form method='POST' action='/regen-token'><div class='bar'>"
+  r->print(F("</div></fieldset><div class='bar'><button type='submit'>Save</button></div></form>"));
+  r->printf("<p class='note'>API token: <code>%s</code></p>", htmlEscape(c.apiToken).c_str());
+  r->print(F("<form method='POST' action='/regen-token'><div class='bar'>"
              "<button class='ghost' type='submit'>Regenerate API token</button></div></form>"
              "<p class='note'>OTA re-disables itself after each successful update. "
-             "The API token authenticates as <code>Authorization: Bearer &lt;token&gt;</code>.</p>"));
+             "The API token authenticates as <code>Authorization: Bearer &lt;token&gt;</code>. "
+             "It is read-only and rotates only with the button above.</p>"));
   pageFoot(r);
   req->send(r);
 }
@@ -300,7 +301,8 @@ void webBegin(Config& cfg, SensorManager& sensors, bool (*onConfigChanged)()) {
     c.httpFormat = param(req, "httpFormat", c.httpFormat);
     c.httpAuthHeader = param(req, "httpAuthHeader", c.httpAuthHeader);
     c.otaEnabled = param(req, "otaEnabled", c.otaEnabled ? "1" : "0") == "1";
-    c.apiToken = param(req, "apiToken", c.apiToken);
+    // apiToken is intentionally NOT settable via /config (read-only, rotate-only
+    // through POST /regen-token) — no custom/edited tokens.
     configSave(c);
     if (g_onChange) g_onChange();
     req->redirect("/config");
