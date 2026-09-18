@@ -3,6 +3,10 @@
 #include <Arduino.h>
 
 void MqttPublisher::configure(const Config& cfg) {
+  // PubSubClient only reads the host on the next connect(), so without this a
+  // host/port/credential change (or disabling MQTT) would keep publishing to
+  // the old broker until that socket happened to drop.
+  if (mqttConnectionSettingsChanged(cfg_, cfg) && client_.connected()) client_.disconnect();
   cfg_ = cfg;
   client_.setServer(cfg_.mqttHost.c_str(), cfg_.mqttPort);
   client_.setSocketTimeout(4);

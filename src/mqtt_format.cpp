@@ -16,7 +16,7 @@ static const char* deviceClassFor(const std::string& name) {
   if (name == "humidity") return "humidity";
   if (name == "pressure") return "pressure";
   if (name == "eco2") return "carbon_dioxide";
-  if (name == "tvoc") return "volatile_organic_compounds";
+  if (name == "tvoc") return "volatile_organic_compounds_parts";   // ppb, not ug/m3
   return nullptr;
 }
 
@@ -33,4 +33,12 @@ std::string discoveryPayload(const std::string& device, const Reading& r,
   std::string out;
   serializeJson(d, out);
   return out;
+}
+
+bool mqttConnectionSettingsChanged(const Config& before, const Config& after) {
+  return before.mqttEnabled != after.mqttEnabled ||
+         before.mqttHost != after.mqttHost ||
+         before.mqttPort != after.mqttPort ||
+         before.mqttUser != after.mqttUser ||
+         before.mqttPassword != after.mqttPassword;
 }

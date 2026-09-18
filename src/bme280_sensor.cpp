@@ -12,7 +12,7 @@ bool Bme280Sensor::read() {
   float pressure = dev_.readPressure() / 100.0f;  // Pa -> hPa
   haveEnv_ = true;
   readings_.clear();
-  addReading(readings_, "temperature", lastTemp_, "C");
+  addReading(readings_, "temperature", lastTemp_, "°C");
   addReading(readings_, "humidity", lastHum_, "%");
   addReading(readings_, "pressure", pressure, "hPa");
   return true;
