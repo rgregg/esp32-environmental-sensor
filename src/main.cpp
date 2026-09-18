@@ -6,6 +6,7 @@
 #include "web_server.h"
 #include <esp_task_wdt.h>
 #include <esp_ota_ops.h>
+#include <atomic>
 
 SensorManager sensors;
 MqttPublisher mqtt;
@@ -13,10 +14,13 @@ HttpPublisher httpPub;
 Config cfg;
 uint32_t lastPublish = 0;
 bool markedValid = false;
+std::atomic<bool> configChanged{false};
 
+// Called from the AsyncTCP task when the config form is saved. The publishers
+// are driven from loop(), so hand the change over rather than reconfiguring
+// (and possibly disconnecting) their clients from another task.
 bool onConfigChanged() {
-  mqtt.configure(cfg);
-  httpPub.configure(cfg);
+  configChanged = true;
   return true;
 }
 
@@ -54,6 +58,10 @@ void setup() {
 
 void loop() {
   esp_task_wdt_reset();
+  if (configChanged.exchange(false)) {
+    mqtt.configure(cfg);
+    httpPub.configure(cfg);
+  }
   sensors.poll();
   mqtt.loop();
   esp_task_wdt_reset();
