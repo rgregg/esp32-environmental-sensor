@@ -60,10 +60,11 @@ void loop() {
   uint32_t intervalSec = cfg.publishIntervalSec < 5 ? 5 : cfg.publishIntervalSec;
   if (millis() - lastPublish > intervalSec * 1000UL) {
     lastPublish = millis();
-    mqtt.publish(cfg.deviceName, sensors.snapshot());
-    httpPub.publish(cfg.deviceName, sensors.snapshot());
+    ReadingSet snap = sensors.snapshot();
+    mqtt.publish(cfg.deviceName, snap);
+    httpPub.publish(cfg.deviceName, snap);
     Serial.printf("published %u readings, mqtt=%d, http=%d\n",
-      (unsigned)sensors.snapshot().size(), mqtt.connected(), httpPub.connected());
+      (unsigned)snap.size(), mqtt.connected(), httpPub.connected());
   }
   if (!markedValid && (mqtt.connected() || httpPub.connected() || millis() > 30000)) {
     esp_ota_mark_app_valid_cancel_rollback();

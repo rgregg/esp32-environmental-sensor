@@ -157,7 +157,7 @@ static void sendStatus(AsyncWebServerRequest* req) {
             sensors.empty() ? "none detected" : htmlEscape(sensors).c_str());
   r->print(F("</dl>"));
 
-  const ReadingSet& snap = g_sensors->snapshot();
+  ReadingSet snap = g_sensors->snapshot();
   if (snap.empty()) {
     r->print(F("<div class='empty'>no readings yet &mdash; waiting for a sensor</div>"));
   } else {
