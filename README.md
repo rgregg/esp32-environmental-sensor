@@ -148,8 +148,9 @@ pio test -e native
 
 ## Project status
 
-All firmware compiles for the target and the host unit tests pass. The hardware
-was not yet in hand when the firmware was written, so the **on-device** checks
-(Ethernet link, live sensor reads, MQTT/HTTP delivery, the web UI, and an OTA
-round-trip) remain to be run on the bench when the board and sensors arrive. The
-CCS811 path specifically awaits the (backordered) MOD-ENV.
+All firmware compiles for the target, the host unit tests pass, and the firmware
+has been verified on the bench (ESP32-POE-ISO-16MB with the MOD-ENV attached):
+Ethernet/DHCP and mDNS, live BME280 and CCS811 readings, the web UI and its auth,
+CSRF and rate limiting, MQTT state topics and Home Assistant discovery, HTTP
+delivery in both `influx` and `json` formats, and OTA round-trips. The board has
+only been run from USB power so far; powering it over PoE is not yet exercised.
