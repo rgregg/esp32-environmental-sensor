@@ -106,6 +106,10 @@ key_entry_d = 8.5;  key_slot_w = 4.2;  key_slot_len = 7;
 fit_y0    = 66;    // slice starts just below the lower standoffs
 fit_strip = 1;     // floor frame width inside the walls
 fit_h     = 15;    // top wall / USB wall height (covers the notch and USB opening)
-fit_stub  = 14;    // length of the side-wall stubs beside the top wall
+fit_stub  = 10;    // length of the side-wall stubs beside the top wall (overlaps the board edge)
 fit_stub_h = esp_z + pcb_t + 1.4;  // stubs reach just above the PCB top
+fit_usb_h = esp_z + pcb_t + usb_h / 2 + usb_open[1] / 2 + usb_open[0] / 2 + 1.5;  // above the USB roof peak
+
+// ---- Printability ----
+min_feature = 1.1;  // narrowest printable wall/strip (>= 2 extrusion lines + margin)
 

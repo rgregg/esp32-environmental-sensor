@@ -15,6 +15,8 @@ expect_solid fit_test
 expect_max_volume 3000 fit_test
 expect_empty outside_fit
 expect_empty fit_wall_slivers
+expect_empty fit_thin
+expect_empty fit_unsupported
 for i in 0 1 2 3 4 5 6; do expect_nonempty fit_probe -D probe=$i; done
 expect_empty clash_base
 expect_empty clash_lid

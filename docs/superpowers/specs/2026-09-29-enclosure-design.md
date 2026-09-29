@@ -117,9 +117,10 @@ the RJ45 sits left of centre at the top.
 ### 2. Main compartment and airflow
 
 - Chimney airflow: **intake** slots on both side walls just above the baffle;
-  **exhaust** slots in the top wall (beside the RJ45 notch) and the upper side
-  walls. Warm air from the ESP32/PHY rises and leaves at the top, away from the
-  sensor.
+  **exhaust** slots in the upper side walls. Warm air from the ESP32/PHY rises
+  and leaves at the top, away from the sensor. *(A single top-wall exhaust slot
+  was dropped: the 4.55 mm between the RJ45 notch and the top-right boss left
+  1 mm fins on either side of it, too thin to print reliably.)*
 - **Board mounting:** three standoffs at the board's asymmetric holes (the board
   can only go in one way), 4 mm tall, 1.8 mm pilot holes for **M2 × 6
   self-tapping** screws. *(The RJ45 support ledge from discussion is dropped: the
@@ -200,8 +201,10 @@ design:
 - **RJ45:** a U-notch in the top wall, open toward the lid, sized for the plug
   body plus clearance. The jack face is recessed 1.5 mm (see §5). A lid tab fills
   the notch above the jack. The plug latch stays outside the case.
-- **USB:** a 12 × 9 mm opening in the right wall, centred on the micro-USB. The
-  wall is thinned to 1.2 mm around it so overmolded plugs seat fully.
+- **USB:** a 12 × 9 mm opening in the right wall, centred on the micro-USB, with a
+  45° peaked roof so its top prints without an 11 mm bridge. The wall is thinned
+  to 1.2 mm around it so overmolded plugs seat fully; that outside pocket has a
+  45° chamfered ceiling for the same reason.
 - **Reset:** a Ø2 mm pinhole in the lid over RST1, with a guide tube ending
   1.5 mm above the button so a paperclip lands on it.
 

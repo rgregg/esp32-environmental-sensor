@@ -70,10 +70,20 @@ module base() {
     // USB opening + outside pocket that thins the wall around it
     esp_frame() {
       zc = pcb_t + usb_h / 2;
-      translate([-10, usb_cy - usb_open[0] / 2, zc - usb_open[1] / 2])
-        cube([10 + usb_x[0], usb_open[0], usb_open[1]]);
-      translate([-10, usb_cy - usb_open[0] / 2 - 3, zc - usb_open[1] / 2 - 3])
-        cube([10 - side_gap - usb_thin, usb_open[0] + 6, usb_open[1] + 6]);
+      // opening, with a 45° peaked roof so it prints without a bridge
+      hull() {
+        translate([-10, usb_cy - usb_open[0] / 2, zc - usb_open[1] / 2])
+          cube([10 + usb_x[0], usb_open[0], usb_open[1]]);
+        translate([-10, usb_cy - 0.01, zc + usb_open[1] / 2])
+          cube([10 + usb_x[0], 0.02, usb_open[0] / 2]);
+      }
+      // outside pocket that thins the wall; 45° chamfered ceiling needs no support
+      hull() {
+        translate([-10, usb_cy - usb_open[0] / 2 - 3, zc - usb_open[1] / 2 - 3])
+          cube([10 - side_gap - usb_thin, usb_open[0] + 6, usb_open[1] + 6]);
+        translate([-10, usb_cy - usb_open[0] / 2 - 3, zc - usb_open[1] / 2 - 3])
+          cube([10 - side_gap - wall, usb_open[0] + 6, usb_open[1] + 6 + wall - usb_thin]);
+      }
     }
     // ribbon notch through the baffle, open toward the lid
     translate([W / 2 - ribbon_notch_w / 2, baffle_y0 - 1, D - lip_h - ribbon_gap])
@@ -83,7 +93,6 @@ module base() {
     side_slots(H - 33, H - 12, esp_z + pcb_t + 1.4, D - lip_h);               // main exhaust
     side_slots(wall + 10, baffle_y0 - 2, floor_t + 3, D - lip_h);              // chamber outlet
     end_slots(0, W / 2 - 6.6, W / 2 + 6.6 + slot_w, floor_t + 2, D - lip_h);   // chamber intake
-    end_slots(H - wall, 21.1, 21.1 + slot_w, esp_z + pcb_t + 1.4, D - lip_h);  // top exhaust
   }
 }
 
@@ -98,8 +107,9 @@ module fit_test() {
       // floor frame: strips along the walls
       difference() {
         translate([-1, fit_y0, -1]) cube([W + 2, H - fit_y0 - 0.02, floor_t + 1]);  // stop short of the ear
-        translate([wall + fit_strip, fit_y0 + fit_strip, -2])
-          cube([cav_w - 2 * fit_strip, H - wall - fit_y0 - 2 * fit_strip, floor_t + 4]);
+        // the cut edge at fit_y0 has no wall, so its strip is as wide as wall + strip
+        translate([wall + fit_strip, fit_y0 + wall + fit_strip, -2])
+          cube([cav_w - 2 * fit_strip, H - 2 * wall - fit_y0 - 2 * fit_strip, floor_t + 4]);
       }
       // standoffs with floor pads, and a floor bar tying MH1 to the right strip
       esp_frame() {
@@ -114,13 +124,13 @@ module fit_test() {
       translate([-1, H - wall, -1]) cube([W + 2, wall - 0.02, fit_h + 1]);
       for (x = [-1, W - wall]) translate([x, H - wall - fit_stub, -1]) cube([wall + 1, fit_stub, fit_stub_h + 1]);
       // right wall around the USB opening
-      translate([W - wall, usb_y - usb_open[0] / 2 - 3, -1]) cube([wall + 1, usb_open[0] + 6, fit_h + 1]);
+      translate([W - wall, usb_y - usb_open[0] / 2 - 3, -1]) cube([wall + 1, usb_open[0] + 6, fit_usb_h + 1]);
     }
   }
 }
 
 // Features fit_test() must keep (check.sh asserts each has volume):
-// 0-2 standoffs, 3 wall bridge over the USB opening, 4 wall beside it,
+// 0-2 standoffs, 3 wall above the USB opening's roof peak, 4 wall beside it,
 // 5/6 top wall right/left of the RJ45 notch.
 module fit_probe(i) {
   zc = pcb_t + usb_h / 2;                          // USB centre, board frame
@@ -129,8 +139,8 @@ module fit_probe(i) {
   nz0 = esp_z + pcb_t + 2;  nz1 = esp_z + pcb_t + rj45_h / 2;
   if (i < 3) esp_frame() translate([esp_holes[i][0], esp_holes[i][1], -standoff_h])
     cylinder(d = standoff_d - 1, h = standoff_h);
-  else if (i == 3) esp_frame() translate([-side_gap - usb_thin + 0.1, usb_cy - 3, zc + usb_open[1] / 2 + 0.3])
-    cube([usb_thin - 0.2, 6, 1]);
+  else if (i == 3) esp_frame() translate([-side_gap - wall + 0.1, usb_cy - 1, zc + usb_open[1] / 2 + usb_open[0] / 2 + 0.3])
+    cube([wall - 0.2, 2, 0.7]);
   else if (i == 4) esp_frame() translate([-side_gap - usb_thin + 0.1, usb_cy + usb_open[0] / 2 + 0.3, zc - 2])
     cube([usb_thin - 0.2, 1, 4]);
   else if (i == 5) translate([notch_x1 + 0.3, H - wall + 0.3, nz0]) cube([1, wall - 0.6, nz1 - nz0]);

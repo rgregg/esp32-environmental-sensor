@@ -4,6 +4,7 @@ include <params.scad>
 use <boards.scad>
 use <base.scad>
 use <lid.scad>
+use <printcheck.scad>
 
 part = "assembly";
 probe = 0;   // fit_probe index, see base.scad
@@ -42,6 +43,9 @@ else if (part == "fit_wall_slivers") intersection() {
     translate([W - wall - 1, esp_top_y - usb_cy - usb_open[0] / 2 - 3, 0]) cube([wall + 2, usb_open[0] + 6, D]);
   }
 }
+// the fit test must slice cleanly: nothing too thin, nothing unsupported
+else if (part == "fit_thin") thin_regions(max(fit_h, fit_usb_h), min_feature) fit_test();
+else if (part == "fit_unsupported") unsupported_regions(max(fit_h, fit_usb_h)) fit_test();
 else if (part == "outside_fit") difference() { fit_test(); cube([W, H, D]); }
 else if (part == "outside_lid") difference() { lid_assembled(); cube([W, H, D + lid_t]); }
 // must render NON-empty: proves the clash test can detect an overlap
