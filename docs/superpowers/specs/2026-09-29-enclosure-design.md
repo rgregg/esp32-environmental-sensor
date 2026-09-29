@@ -208,8 +208,9 @@ through-hole leads. Revised:
 
 - `enclosure.scad`: parameters at the top, with board data transcribed from the
   table above. Modules `base()`, `lid()`, `sensor_bay()`, `fit_test()`, and
-  `board_keepouts()` (simple solids for PCBs, connectors, the plugs' insertion
-  paths, and under-board clearance). A `show_boards` preview option overlays
+  `board_keepouts()` (simple solids for both PCBs, including the MOD-ENV and its
+  IDC plug, plus connectors, the plugs' insertion paths, and under-board
+  clearance). A `show_boards` preview option overlays
   the keepouts.
 - `export.sh`: renders `base.stl`, `lid.stl` and `fit_test.stl` using the
   `openscad/openscad` Docker image (AppImage fallback).
