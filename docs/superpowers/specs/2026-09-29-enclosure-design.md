@@ -87,11 +87,13 @@ footprint positions, 3D-model bounding boxes):
 
 ## Case coordinate frame
 
-Viewed from the front (lid toward viewer): **x** to the right, **y** downward
-from the outer top surface, **z** from the back (wall side) toward the lid.
+Right-handed. Viewed from the front (lid toward viewer): **x** to the right,
+**y up** from the outer bottom surface, **z** from the back (wall side) toward
+the lid. (A y-down frame with z toward the viewer would be left-handed and
+would silently mirror the model — USB would end up on the wrong side.)
 
 The board mounts component side toward the lid, rotated 180° in-plane so the
-RJ45 is at the top: `case_x = board_left + (28 − bx)`, `case_y = board_top + by`.
+RJ45 is at the top: `case_x = board_left + (28 − bx)`, `case_y = board_top − by`.
 Consequently the USB, reset button, and LED column land on the **right** side;
 the RJ45 sits left of centre at the top.
 
@@ -101,12 +103,12 @@ the RJ45 sits left of centre at the top.
 
 - Two printed parts: **base** (back + side walls + internal structure; screws
   to the wall) and **lid** (front face).
-- Approximate outer size **34 W × 152 H × 28 D mm** (all derived from
-  parameters; final numbers come from the model).
+- Outer size **33.6 W × 154.6 H × 29 D mm** (190.6 mm tall including the
+  mounting ears; all derived from parameters).
   - Width: 28 mm board + clearance + 2 mm walls.
-  - Depth: driven by the UEXT IDC plug (plug top ≈21 mm above the floor) plus
-    ribbon bend room → ≈24 mm internal. *(Grew from the ≈25 mm total quoted in
-    discussion once the IDC plug height was accounted for.)*
+  - Depth: driven by the UEXT IDC plug (plug + ribbon ≈17.5 mm above the PCB,
+    PCB at 6 mm above the back) → 25 mm internal. *(Grew from the ≈25 mm total
+    quoted in discussion once the IDC plug height was accounted for.)*
   - Height, top to bottom: top wall, RJ45 jack depth, 98.15 mm board, 6.3 mm
     antenna overhang, baffle, sensor chamber, bottom wall.
 - Walls 2 mm. One global `tolerance` parameter (default 0.3 mm) sets every
@@ -120,11 +122,14 @@ the RJ45 sits left of centre at the top.
   sensor.
 - **Board mounting:** three standoffs at the board's asymmetric holes (the board
   can only go in one way), 4 mm tall, 1.8 mm pilot holes for **M2 × 6
-  self-tapping** screws. A ledge under the RJ45 end takes plug-insertion force
-  so the board doesn't flex.
-- **Ribbon slack pocket:** a tray on the lid underside over the lower main
-  compartment (the ESP32 module region, where there is ≈15 mm of free height
-  above the 3.1 mm module), with retaining fingers. It holds the ≈70 mm of
+  self-tapping** screws. *(The RJ45 support ledge from discussion is dropped: the
+  jack's through-hole leads occupy the space under that end, and mounting hole
+  MH1 is only 2.7 mm from the jack end, so plug force is already carried by a
+  screw.)*
+- **Ribbon slack pocket:** two clip bars hanging from the lid underside over the
+  lower main compartment (the ESP32 module region, where there is ≈15 mm of free
+  height above the 3.1 mm module), each a bridge on two posts about 5.5 mm below
+  the lid. The space between the lid and the bars holds the ≈70 mm of
   surplus ribbon Z-folded in up to 4 layers. Ribbon path: board UEXT plug → up
   and over → pocket → baffle notch → sensor chamber.
 
@@ -142,7 +147,8 @@ the RJ45 sits left of centre at the top.
 - About 30 mm of internal height.
 - MOD-ENV mounted **face-out, UEXT header at the top, sensor edge at the
   bottom**, so the BME280/CCS811 sit closest to incoming air.
-- Retention: side edge guides; a peg rising from the floor through the module's
+- Retention: four corner ledges (a 1 mm shelf under each PCB corner plus a
+  locating wall); a peg rising from the floor through the module's
   oval slot (locates it); a lid rib bearing on the IDC plug (stops it lifting).
   The ribbon may need a half twist to match pin 1 — that's acceptable.
 - ≈8 mm of open air space below the module's sensor edge (also clears the bottom-corner lid bosses).
@@ -156,8 +162,9 @@ The four-corner screws presented in discussion don't fit: the board fills the
 full cavity width, so there is no corner space for an M3 insert boss (needs
 ≈Ø7 mm) along the board. Revised:
 
-- **Five M3 heat-set inserts** in base bosses with **M3 × 10 screws** through
-  counterbored lid holes:
+- **Five M3 heat-set inserts** (hole Ø4.0 × 6 mm) in base bosses with
+  **M3 × 8 button-head screws** whose heads sit on the lid face (a 2 mm lid is too
+  thin to counterbore):
   - **Top-right** corner: the region right of the RJ45, above the board.
     To make room, the RJ45 face is recessed **1.5 mm** inside the top wall's
     outer surface (opening sized for the plug body, so the plug still seats
@@ -167,71 +174,90 @@ full cavity width, so there is no corner space for an M3 insert boss (needs
 - A 1 mm locating lip on the lid fits inside the base walls (alignment, and
   closes the seam).
 
-### 6. Wall mounting (refined in detail design)
+### 6. Wall mounting (refined in detail design, twice)
 
 Keyholes cut through a 2 mm floor would put the wall-screw heads inside the
 4 mm under-board gap, where they would collide with the RJ45 and other
-through-hole leads. Revised:
+through-hole leads. The first fix, keyholes in two 4.5 mm rails on the back,
+was dropped during prototyping: printing the base back-down would leave the
+floor between the rails as an unsupported bridge about 100 mm long. Final
+design:
 
-- Two **horizontal rails, 4.5 mm tall, across the full width of the back**,
-  one near the top and one under the sensor chamber. Each rail contains a
-  keyhole: an Ø8.5 mm entry hole, a 4.2 mm slot above it, and an Ø8.5 mm
-  head-clearance channel inside the rail. All keyhole geometry is inside the
-  rail and floor, none of it in the cavity.
-- Keyholes are centred on the width and spaced ≈125 mm apart, for #6/#8
-  (3.5–4 mm) wood or drywall screws with heads up to 8 mm. The unit hangs by
-  sliding **down** onto two screws, and lifts off without opening it.
-- Side benefit: the rails stand the case ≈4.5 mm off the wall, so air circulates
-  behind it and the wall's temperature has less influence on the reading.
+- Two **mounting ears**, 16 × 18 × 3 mm, flush with the back plane: one above
+  the top wall and one below the bottom wall, centred on the width. Each has a
+  keyhole with an Ø8.5 mm entry hole and a 4.2 mm slot running 7 mm above it.
+  The screw head sits in front of the ear, which is clamped between the head and
+  the wall.
+- For #6/#8 (3.5–4 mm) wood or drywall screws with heads up to 8 mm, set
+  **≈172.5 mm apart** vertically. Leave the heads ≈3.5 mm proud of the wall.
+- The unit hangs by sliding **down** onto the two screws, and lifts off without
+  opening it.
+- The case sits flat against the wall. The Ethernet cable passes in front of the
+  top ear, since the plug sits ≥7 mm in front of the back plane.
 
 ### 7. Ports and access
 
 - **RJ45:** a U-notch in the top wall, open toward the lid, sized for the plug
   body plus clearance. The jack face is recessed 1.5 mm (see §5). A lid tab fills
   the notch above the jack. The plug latch stays outside the case.
-- **USB:** a 12 × 8 mm opening in the right wall, centred on the micro-USB. The
+- **USB:** a 12 × 9 mm opening in the right wall, centred on the micro-USB. The
   wall is thinned to 1.2 mm around it so overmolded plugs seat fully.
 - **Reset:** a Ø2 mm pinhole in the lid over RST1, with a guide tube ending
   1.5 mm above the button so a paperclip lands on it.
 
 ### 8. Printing
 
-- **Base:** printed back-down, with the rails on the bed. Bridges: the rail head
-  channels, and the vent slots in the top and bottom walls. Standoffs, bosses,
+- **Base:** printed back-down, ears on the bed. Only short bridges: the tops of
+  the vent slots and of the USB opening. Standoffs, bosses,
   baffle and guides print vertically.
-- **Lid:** printed face-down. The reset tube, chamber rib, slack-pocket tray and
-  lip print upward.
+- **Lid:** printed face-down. The reset tube, chamber rib, notch tab and tongue,
+  slack clips and lip print upward. The clip bars are 16 mm bridges.
 - Vent slots are 1.5–2 mm wide with 2 mm ribs.
 - **Recommended settings:** 0.2 mm layers, 3 perimeters, 20 % infill.
 
 ## Deliverables (`hardware/enclosure/`)
 
-- `enclosure.scad`: parameters at the top, with board data transcribed from the
-  table above. Modules `base()`, `lid()`, `sensor_bay()`, `fit_test()`, and
-  `board_keepouts()` (simple solids for both PCBs, including the MOD-ENV and its
-  IDC plug, plus connectors, the plugs' insertion paths, and under-board
-  clearance). A `show_boards` preview option overlays
-  the keepouts.
-- `export.sh`: renders `base.stl`, `lid.stl` and `fit_test.stl` using the
-  `openscad/openscad` Docker image (AppImage fallback).
+- `params.scad`: every dimension, with board data transcribed from the tables
+  above.
+- `boards.scad`: board placement transforms, plus `board_keepouts()`. These are
+  simple solids for both PCBs (including the MOD-ENV and its IDC plug),
+  connectors, tall parts, the plugs' insertion paths and the under-board
+  clearance.
+- `base.scad`: `base()` and `fit_test()`.
+- `lid.scad`: `lid_assembled()` for checks and `lid()` in print orientation.
+- `enclosure.scad`: the entry point. `-D 'part="…"'` selects `base`, `lid`,
+  `fit_test`, `assembly` (keepouts shown as ghosts) or one of the check parts.
+- `tools/openscad.sh`: runs OpenSCAD with the Manifold backend from a
+  **digest-pinned** `openscad/openscad:dev` Docker image. The `latest` tag is the
+  2021.01 release, which has no Manifold backend. With
+  `OPENSCAD_NO_DOCKER=1`, or when Docker isn't available, it uses `openscad`
+  from PATH (the AppImage).
+- `tools/stl_report.py`: reports an STL's volume and the bounding boxes of any
+  clashing parts. Needs Python 3 only (standard library).
 - `check.sh`: the automated verification below.
-- `README.md`: parts list (5 × M3 heat-set inserts, 5 × M3 × 10 screws,
-  3 × M2 × 6 self-tapping screws, 2 wall screws), print settings, assembly
-  order, the caliper checks, and a board-revision note.
-- STLs are **generated, not committed**: add `hardware/enclosure/*.stl` to
-  `.gitignore`.
+- `export.sh`: renders `build/stl/{base,lid,fit_test}.stl`.
+- `README.md`: parts list (5 × M3 heat-set inserts, 5 × M3 × 8 button-head
+  screws, 3 × M2 × 6 self-tapping screws, 2 wall screws), print settings,
+  assembly order, the caliper checks, and a board-revision note.
+- Generated output goes in `hardware/enclosure/build/`, which is git-ignored.
+  STLs are not committed.
 - A short "Enclosure" pointer in the top-level README.
 
 ## Verification
 
 1. **Automated (`check.sh`):**
-   - `base()` and `lid()` each render to a non-empty, manifold mesh with no
-     CGAL/Manifold warnings.
-   - **Interference:** `intersection() { case; board_keepouts(); }` must render
-     **empty**, and the script fails if it does not. This covers board edges,
-     every connector, the RJ45 and USB plug insertion paths, the antenna
-     overhang, and the under-board clearance.
-   - The assembled base and lid must not intersect each other.
+   - `base`, `lid` and `fit_test` each render to a non-empty mesh with no
+     warnings.
+   - **Interference:** `intersection() { case; board_keepouts(); }` must have
+     **zero volume** (<0.01 mm³). Faces that only touch, such as the PCB on its
+     standoffs, are allowed. This covers board edges, every connector, the RJ45
+     and USB plug insertion paths, the antenna overhang, and the under-board
+     clearance.
+   - The assembled base and lid have zero-volume overlap.
+   - **Envelope:** nothing on the base (apart from the ears) and nothing on the
+     lid extends outside the outer box.
+   - **Self-test:** the case box intersected with the keepouts must be
+     *non*-empty. This proves the clash check can fail.
 2. **Fit test (manual):** print `fit_test.stl`, a thin slice with the floor,
    standoffs, and the wall ring carrying the RJ45 and USB openings (≈20 min).
    Confirm the holes line up and both plugs seat.
