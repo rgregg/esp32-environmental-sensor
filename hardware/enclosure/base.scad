@@ -66,7 +66,7 @@ module base() {
     esp_frame() for (h = esp_holes)
       translate([h[0], h[1], -standoff_h - floor_t + 1]) cylinder(d = pilot_d, h = standoff_h + floor_t);
     // RJ45 notch through the top wall, open toward the lid
-    esp_frame() translate([rj45_x[0] - tol, rj45_y[0] - 10, -1]) cube([rj45_x[1] - rj45_x[0] + 2 * tol, 11, 40]);
+    esp_frame() translate([rj45_x[0] - tol, rj45_y[0] - 10, rj45_z0 - tol]) cube([rj45_x[1] - rj45_x[0] + 2 * tol, 11, 40]);
     // USB opening + outside pocket that thins the wall around it
     esp_frame() {
       zc = pcb_t + usb_h / 2;
@@ -145,5 +145,12 @@ module fit_probe(i) {
     cube([usb_thin - 0.2, 1, 4]);
   else if (i == 5) translate([notch_x1 + 0.3, H - wall + 0.3, nz0]) cube([1, wall - 0.6, nz1 - nz0]);
   else if (i == 6) translate([0.5, H - wall + 0.3, nz0]) cube([notch_x0 - 0.8, wall - 0.6, nz1 - nz0]);
+}
+
+// Top wall directly under the RJ45 jack: must be solid up to tol below the
+// jack's underside, so the jack sits snug in its notch with no gap beneath.
+module rj45_floor_probe() {
+  esp_frame() translate([rj45_x[0] + 1, rj45_y[0] - rj45_recess + 0.1, pcb_t - tol - 0.5])
+    cube([rj45_x[1] - rj45_x[0] - 2, wall - 0.2, 0.4]);
 }
 

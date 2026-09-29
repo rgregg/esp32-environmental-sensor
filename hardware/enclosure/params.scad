@@ -23,6 +23,7 @@ esp_l = 98.15;
 esp_holes  = [[7.64, 2.73], [2.56, 70.68], [25.42, 70.68]];
 esp_hole_d = 2.2;
 rj45_x  = [11.05, 27.05];  rj45_y = [-8.14, 13.86];  rj45_h = 13.3;
+rj45_z0 = pcb_t;           // jack underside: sits on the PCB top, incl. the overhang (confirmed by fit test)
 rj45_plug_x = [13.2, 24.9]; // plug body width ~11.7, centred on the jack
 usb_x   = [0.08, 7.20];    usb_y  = [31.80, 39.20];  usb_h  = 2.7;
 usb_cy  = 35.5;

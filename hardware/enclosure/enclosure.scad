@@ -17,6 +17,7 @@ echo(str("wall screw spacing (mm): ", (H + ear_h / 2 + key_slot_len / 2) - (-ear
 if (part == "base") base();
 else if (part == "lid") lid();
 else if (part == "fit_test") fit_test();
+else if (part == "rj45_floor") intersection() { base(); rj45_floor_probe(); }
 else if (part == "fit_probe") intersection() { fit_test(); fit_probe(probe); }
 else if (part == "lid_assembled") lid_assembled();
 else if (part == "keepouts") board_keepouts();

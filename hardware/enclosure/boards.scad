@@ -39,7 +39,7 @@ module esp_keepouts() {
     // WROOM module incl. antenna overhang past the board edge
     box(wroom_x[0], wroom_y[0], 0, wroom_x[1], wroom_y[1], pcb_t + wroom_h);
     // RJ45 jack body and plug insertion path (out through the top wall)
-    box(rj45_x[0], rj45_y[0], -1, rj45_x[1], rj45_y[1], pcb_t + rj45_h);
+    box(rj45_x[0], rj45_y[0], rj45_z0, rj45_x[1], rj45_y[1], pcb_t + rj45_h);
     box(rj45_plug_x[0], rj45_y[0] - 40, pcb_t + 0.5, rj45_plug_x[1], rj45_y[0], pcb_t + rj45_h - 0.5);
     // micro-USB receptacle and plug path (out through the right wall)
     box(usb_x[0], usb_y[0], pcb_t, usb_x[1], usb_y[1], pcb_t + usb_h);

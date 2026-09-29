@@ -11,8 +11,9 @@ expect_nonempty rj45_exits_top
 expect_solid base
 expect_solid lid
 expect_solid fit_test
-# the fit test must stay a quick print but keep every feature it exists to check
-expect_max_volume 3000 fit_test
+# the fit test must stay a quick print (~20 min: Orca measured 19 min at 2973 mm^3)
+# but keep every feature it exists to check
+expect_max_volume 3200 fit_test
 expect_empty outside_fit
 expect_empty fit_wall_slivers
 expect_empty fit_thin
@@ -22,6 +23,8 @@ expect_empty clash_base
 expect_empty clash_lid
 expect_empty clash_base_lid
 expect_empty outside_base
+# the RJ45 sits snug on the notch floor (no gap under the jack)
+expect_nonempty rj45_floor
 expect_empty outside_lid
 # a measured IDC plug taller than the estimate must still fit (lid depth grows)
 expect_empty clash_lid -D idc_h=21

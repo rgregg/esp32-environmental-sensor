@@ -97,7 +97,7 @@ in the case, not in firmware.
   overlap, and the board isn't mirrored (the USB path exits right and the RJ45 path
   exits the top).
 - `base`, `lid`, `fit_test`: each renders with no warnings.
-- `fit_test` stays under a 3000 mm³ budget, doesn't include the ear or leftover slivers
+- `fit_test` stays under a 3200 mm³ budget, doesn't include the ear or leftover slivers
   of side wall, and still contains all three standoffs, the walls beside and above the
   USB opening, and both sides of the RJ45 notch (`fit_probe` 0–6).
 - `fit_thin`, `fit_unsupported`: sliced every 0.5 mm, the fit test has nothing narrower
