@@ -1052,7 +1052,7 @@ Then temporarily change the loop in `export.sh` to `for part in base bogus; do`,
 
 Create `hardware/enclosure/README.md`:
 
-```markdown
+````markdown
 # Enclosure
 
 A 3D-printable wall-mount enclosure for the ESP32-POE-ISO and the MOD-ENV sensor. It is
@@ -1151,7 +1151,7 @@ in the case, not in firmware.
 - `clash_base_lid`: the lid and base don't overlap.
 - `outside_base`, `outside_lid`: nothing sticks out of the outer box (apart from the
   ears).
-```
+````
 
 - [ ] **Step 4: Point to it from the top-level README**
 
