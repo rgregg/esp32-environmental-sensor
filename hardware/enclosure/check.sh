@@ -16,6 +16,9 @@ expect_empty clash_lid
 expect_empty clash_base_lid
 expect_empty outside_base
 expect_empty outside_lid
+# a measured IDC plug taller than the estimate must still fit (lid depth grows)
+expect_empty clash_lid -D idc_h=21
+expect_empty clash_base_lid -D idc_h=21
 
 [[ $fail -eq 0 ]] && echo "ALL CHECKS PASSED" || echo "CHECKS FAILED"
 exit $fail

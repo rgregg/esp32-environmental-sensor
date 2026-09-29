@@ -22,7 +22,8 @@ parametric OpenSCAD. Design rationale:
 
 ```
 ./check.sh                      # all geometry checks; must print ALL CHECKS PASSED
-python3 tools/test_stl_report.py
+python3 tools/test_stl_report.py  # unit tests for the checker
+tools/test_check_lib.sh
 ./export.sh                     # writes build/stl/{base,lid,fit_test}.stl
 ```
 
@@ -36,7 +37,7 @@ they differ, then re-run `./check.sh`:
 
 | Check | Parameter | Assumed |
 |---|---|---|
-| Height from the PCB top to the top of the plugged-in IDC connector, plus ribbon | `idc_h` | 17.5 mm |
+| Height from the PCB top to the top of the plugged-in IDC connector, plus the ribbon folded the way it will be routed. The case depth grows with it. | `idc_h` | 17.5 mm |
 | Your micro-USB cable's plug overmold (width × thickness) | `usb_plug_w`, `usb_plug_h` | 11 × 7.5 mm |
 | Board revision (printed on the PCB) | — | Rev J–N1 |
 | Which side of the MOD-ENV's UEXT header the key faces | — | route the ribbon to match pin 1 |
@@ -65,14 +66,17 @@ they differ, then re-run `./check.sh`:
 
 1. Heat-set the five M3 inserts into the bosses (top-right, the two baffle ends, and
    the two bottom corners).
-2. Plug the ribbon into the ESP32-POE-ISO's UEXT header and into the MOD-ENV.
-3. Screw the ESP32-POE-ISO to the three standoffs, components facing out and the RJ45
-   into the top notch.
-4. Seat the MOD-ENV over the peg in the bottom chamber: components facing out, UEXT
-   header up, sensors toward the bottom vents.
-5. Lay the ribbon through the notch in the baffle. Z-fold the slack and tuck it under
-   the two clip bars on the inside of the lid as you close it.
-6. Fit the lid and drive the five M3 × 8 screws. Poke a paperclip through the pinhole
+2. Screw the ESP32-POE-ISO to the three standoffs, components facing out and the RJ45
+   in the top notch. Do this before plugging in the ribbon, which would otherwise lie
+   over the two lower screw holes.
+3. Plug the ribbon into the ESP32-POE-ISO's UEXT header.
+4. Thread the ribbon's free end under the two clip bars on the inside of the lid. Each
+   clip is a closed loop, so the end has to go through first.
+5. Lay the ribbon through the notch in the baffle and plug it into the MOD-ENV. Seat
+   the MOD-ENV over the peg in the bottom chamber: components facing out, UEXT header
+   up, sensors toward the bottom vents. Z-fold the slack between the lid and the clip
+   bars as you close the lid.
+6. Drive the five M3 × 8 screws. Poke a paperclip through the pinhole
    to check that it reaches the reset button.
 7. Set two wall screws **172.6 mm apart**, one directly above the other, with the heads
    ≈3.5 mm proud of the wall. Hang the case by its ear keyholes and slide it down.
@@ -94,5 +98,7 @@ in the case, not in firmware.
 - `clash_base`, `clash_lid`: the case doesn't overlap any board, connector, plug path,
   antenna or under-board lead clearance. Faces that only touch are allowed.
 - `clash_base_lid`: the lid and base don't overlap.
+- `clash_lid` / `clash_base_lid` with `idc_h=21`: a taller measured plug still fits,
+  because the lid depth grows with `idc_h`.
 - `outside_base`, `outside_lid`: nothing sticks out of the outer box (apart from the
   ears).

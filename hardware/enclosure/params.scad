@@ -53,10 +53,11 @@ env_comp_h = 1.5;             // sensors / passives above PCB top
 side_gap   = 0.8;                       // board edge to side wall
 cav_w      = esp_w + 2 * side_gap;      // 29.6
 W          = cav_w + 2 * wall;          // outer width
-cav_d      = 25;                        // floor top to lid inner face
+standoff_h = 4;
+ribbon_clr = 1.9;                       // room between the ESP IDC plug stack and the lid
+cav_d      = standoff_h + pcb_t + idc_h + ribbon_clr;  // floor top to lid inner face (25 at idc_h 17.5)
 D          = floor_t + cav_d;           // base height (z of lid inner face)
 
-standoff_h = 4;
 esp_z      = floor_t + standoff_h;      // ESP PCB bottom
 
 env_pad    = 1;                         // MOD-ENV sits this far above the floor
