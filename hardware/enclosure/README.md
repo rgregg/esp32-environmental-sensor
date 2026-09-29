@@ -47,8 +47,8 @@ they differ, then re-run `./check.sh`:
 - PETG, 0.2 mm layers, 3 perimeters, 20 % infill, **no supports**.
 - The STLs are already in print orientation: the base lies back-down (ears on the bed)
   and the lid lies face-down.
-- **Print `fit_test.stl` first.** It's about 2.8 cm³, under a quarter of the old slice,
-  so expect roughly 20–30 minutes depending on your printer. It's a skeleton cut from
+- **Print `fit_test.stl` first.** It's about 3 cm³, a quarter of the old slice.
+  OrcaSlicer estimates 19 minutes of printing on an X1C in PETG at 0.2 mm layers. It's a skeleton cut from
   the real base: the three standoffs on a thin floor frame, the top wall with the RJ45
   notch, and the right wall around the USB opening. Check that the three M2 screws line
   up with the board holes, the RJ45 jack drops into its notch, and the USB plug seats
@@ -100,6 +100,9 @@ in the case, not in firmware.
 - `fit_test` stays under a 3000 mm³ budget, doesn't include the ear or leftover slivers
   of side wall, and still contains all three standoffs, the walls beside and above the
   USB opening, and both sides of the RJ45 notch (`fit_probe` 0–6).
+- `fit_thin`, `fit_unsupported`: sliced every 0.5 mm, the fit test has nothing narrower
+  than `min_feature` (1.1 mm) and nothing steeper than 45°, so there are no bridges and
+  no floating regions (`printcheck.scad`).
 - `clash_base`, `clash_lid`: the case doesn't overlap any board, connector, plug path,
   antenna or under-board lead clearance. Faces that only touch are allowed.
 - `clash_base_lid`: the lid and base don't overlap.
