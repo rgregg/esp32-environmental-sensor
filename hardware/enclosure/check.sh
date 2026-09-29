@@ -11,6 +11,11 @@ expect_nonempty rj45_exits_top
 expect_solid base
 expect_solid lid
 expect_solid fit_test
+# the fit test must stay a quick print but keep every feature it exists to check
+expect_max_volume 3000 fit_test
+expect_empty outside_fit
+expect_empty fit_wall_slivers
+for i in 0 1 2 3 4 5 6; do expect_nonempty fit_probe -D probe=$i; done
 expect_empty clash_base
 expect_empty clash_lid
 expect_empty clash_base_lid

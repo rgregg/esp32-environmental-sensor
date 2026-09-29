@@ -6,6 +6,7 @@ use <base.scad>
 use <lid.scad>
 
 part = "assembly";
+probe = 0;   // fit_probe index, see base.scad
 
 // Wall screws rest at the top of each keyhole slot.
 echo(str("outer size W x H x D (mm): ", W, " x ", H, " x ", D + lid_t,
@@ -15,6 +16,7 @@ echo(str("wall screw spacing (mm): ", (H + ear_h / 2 + key_slot_len / 2) - (-ear
 if (part == "base") base();
 else if (part == "lid") lid();
 else if (part == "fit_test") fit_test();
+else if (part == "fit_probe") intersection() { fit_test(); fit_probe(probe); }
 else if (part == "lid_assembled") lid_assembled();
 else if (part == "keepouts") board_keepouts();
 else if (part == "assembly") {
@@ -32,6 +34,15 @@ else if (part == "outside_base") difference() {
   cube([W, H, D]);
   for (y = [-ear_h, H]) translate([W / 2 - ear_w / 2, y, 0]) cube([ear_w, ear_h, ear_t]);
 }
+// fit test keeps no side wall above the floor except the stubs and the USB segment
+else if (part == "fit_wall_slivers") intersection() {
+  fit_test();
+  difference() {
+    for (x = [0, W - wall]) translate([x, fit_y0, floor_t]) cube([wall, H - wall - fit_stub - fit_y0, D]);
+    translate([W - wall - 1, esp_top_y - usb_cy - usb_open[0] / 2 - 3, 0]) cube([wall + 2, usb_open[0] + 6, D]);
+  }
+}
+else if (part == "outside_fit") difference() { fit_test(); cube([W, H, D]); }
 else if (part == "outside_lid") difference() { lid_assembled(); cube([W, H, D + lid_t]); }
 // must render NON-empty: proves the clash test can detect an overlap
 else if (part == "clash_selftest") intersection() { cube([W, H, D]); board_keepouts(); }

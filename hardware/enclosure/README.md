@@ -47,10 +47,12 @@ they differ, then re-run `./check.sh`:
 - PETG, 0.2 mm layers, 3 perimeters, 20 % infill, **no supports**.
 - The STLs are already in print orientation: the base lies back-down (ears on the bed)
   and the lid lies face-down.
-- **Print `fit_test.stl` first** (about 20 min). It's a low slice of the base's upper
-  section. Check that the three M2 screws line up with the board holes, the RJ45 jack
-  drops into its notch, and the USB plug seats fully. If anything is tight, raise `tol`
-  in `params.scad`.
+- **Print `fit_test.stl` first.** It's about 2.8 cm³, under a quarter of the old slice,
+  so expect roughly 20–30 minutes depending on your printer. It's a skeleton cut from
+  the real base: the three standoffs on a thin floor frame, the top wall with the RJ45
+  notch, and the right wall around the USB opening. Check that the three M2 screws line
+  up with the board holes, the RJ45 jack drops into its notch, and the USB plug seats
+  fully. If anything is tight, raise `tol` in `params.scad`.
 
 ## Parts
 
@@ -95,6 +97,9 @@ in the case, not in firmware.
   overlap, and the board isn't mirrored (the USB path exits right and the RJ45 path
   exits the top).
 - `base`, `lid`, `fit_test`: each renders with no warnings.
+- `fit_test` stays under a 3000 mm³ budget, doesn't include the ear or leftover slivers
+  of side wall, and still contains all three standoffs, the walls beside and above the
+  USB opening, and both sides of the RJ45 notch (`fit_probe` 0–6).
 - `clash_base`, `clash_lid`: the case doesn't overlap any board, connector, plug path,
   antenna or under-board lead clearance. Faces that only touch are allowed.
 - `clash_base_lid`: the lid and base don't overlap.

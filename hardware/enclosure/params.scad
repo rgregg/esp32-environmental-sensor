@@ -101,3 +101,11 @@ ribbon_notch_w = 14;  ribbon_gap = 2;   // baffle notch width; ribbon gap under 
 reset_hole_d = 2;  reset_tube_od = 5;  reset_tube_clear = 1.5;
 ear_w = 16;  ear_h = 18;  ear_t = 3;
 key_entry_d = 8.5;  key_slot_w = 4.2;  key_slot_len = 7;
+
+// ---- Fit test (quick print: standoffs, RJ45 notch, USB opening) ----
+fit_y0    = 66;    // slice starts just below the lower standoffs
+fit_strip = 1;     // floor frame width inside the walls
+fit_h     = 15;    // top wall / USB wall height (covers the notch and USB opening)
+fit_stub  = 14;    // length of the side-wall stubs beside the top wall
+fit_stub_h = esp_z + pcb_t + 1.4;  // stubs reach just above the PCB top
+

@@ -87,10 +87,53 @@ module base() {
   }
 }
 
-// Quick-print slice: floor, all three standoffs, RJ45 notch, USB opening.
+// Quick-print fit check: the three standoffs on a skeleton floor, the top wall
+// with the RJ45 notch, and the right wall around the USB opening. Everything
+// kept is cut from base(), so it matches the real part exactly.
 module fit_test() {
+  usb_y = esp_top_y - usb_cy;                      // USB centre, case frame
   intersection() {
     base();
-    translate([-1, 66, -1]) cube([W + 2, H + ear_h, 17]);
+    union() {
+      // floor frame: strips along the walls
+      difference() {
+        translate([-1, fit_y0, -1]) cube([W + 2, H - fit_y0 - 0.02, floor_t + 1]);  // stop short of the ear
+        translate([wall + fit_strip, fit_y0 + fit_strip, -2])
+          cube([cav_w - 2 * fit_strip, H - wall - fit_y0 - 2 * fit_strip, floor_t + 4]);
+      }
+      // standoffs with floor pads, and a floor bar tying MH1 to the right strip
+      esp_frame() {
+        for (h = esp_holes) {
+          translate([h[0], h[1], -standoff_h - floor_t - 1]) cylinder(d = standoff_d + 4, h = floor_t + 1);  // pad
+          translate([h[0], h[1], -standoff_h - 1]) cylinder(d = standoff_d + 0.2, h = standoff_h + 1);       // standoff
+        }
+        translate([-side_gap - wall - 1, esp_holes[0][1] - 2, -standoff_h - floor_t - 1])
+          cube([esp_holes[0][0] + side_gap + wall + 1, 4, floor_t + 1]);
+      }
+      // top wall with the RJ45 notch, plus side stubs beside the board's top edge
+      translate([-1, H - wall, -1]) cube([W + 2, wall - 0.02, fit_h + 1]);
+      for (x = [-1, W - wall]) translate([x, H - wall - fit_stub, -1]) cube([wall + 1, fit_stub, fit_stub_h + 1]);
+      // right wall around the USB opening
+      translate([W - wall, usb_y - usb_open[0] / 2 - 3, -1]) cube([wall + 1, usb_open[0] + 6, fit_h + 1]);
+    }
   }
 }
+
+// Features fit_test() must keep (check.sh asserts each has volume):
+// 0-2 standoffs, 3 wall bridge over the USB opening, 4 wall beside it,
+// 5/6 top wall right/left of the RJ45 notch.
+module fit_probe(i) {
+  zc = pcb_t + usb_h / 2;                          // USB centre, board frame
+  notch_x0 = esp_x0 + esp_w - rj45_x[1] - tol;     // RJ45 notch, case frame
+  notch_x1 = esp_x0 + esp_w - rj45_x[0] + tol;
+  nz0 = esp_z + pcb_t + 2;  nz1 = esp_z + pcb_t + rj45_h / 2;
+  if (i < 3) esp_frame() translate([esp_holes[i][0], esp_holes[i][1], -standoff_h])
+    cylinder(d = standoff_d - 1, h = standoff_h);
+  else if (i == 3) esp_frame() translate([-side_gap - usb_thin + 0.1, usb_cy - 3, zc + usb_open[1] / 2 + 0.3])
+    cube([usb_thin - 0.2, 6, 1]);
+  else if (i == 4) esp_frame() translate([-side_gap - usb_thin + 0.1, usb_cy + usb_open[0] / 2 + 0.3, zc - 2])
+    cube([usb_thin - 0.2, 1, 4]);
+  else if (i == 5) translate([notch_x1 + 0.3, H - wall + 0.3, nz0]) cube([1, wall - 0.6, nz1 - nz0]);
+  else if (i == 6) translate([0.5, H - wall + 0.3, nz0]) cube([notch_x0 - 0.8, wall - 0.6, nz1 - nz0]);
+}
+

@@ -42,3 +42,15 @@ expect_nonempty() {  # part must have solid volume
     echo "ok   $* has volume"
   else echo "FAIL $*: expected solid geometry"; fail=1; fi
 }
+
+expect_max_volume() {  # expect_max_volume MM3 PART [ARGS...]: clean render within a volume budget
+  local max=$1; shift
+  render "$@"
+  if [[ $rc -eq 0 ]] && ! grep -qE "WARNING|ERROR" <<<"$log" &&
+     report=$(python3 tools/stl_report.py "$stl" --max-volume "$max"); then
+    echo "ok   $* within ${max} mm^3 ($(head -1 <<<"$report"))"
+  else
+    echo "FAIL $*: over ${max} mm^3 or render failed ($(head -1 <<<"${report:-$log}"))"; fail=1
+  fi
+  report=""
+}
