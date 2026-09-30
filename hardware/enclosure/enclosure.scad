@@ -31,6 +31,12 @@ else if (part == "clash_base") intersection() { base(); board_keepouts(); }
 else if (part == "clash_lid") intersection() { lid_assembled(); board_keepouts(); }
 else if (part == "clash_base_lid") intersection() { base(); lid_assembled(); }
 // nothing may stick out of the outer envelope (the ears are the only exception)
+// every insert hole must have insert_wall of solid material around it, full depth
+else if (part == "insert_walls") difference() {
+  for (b = bosses) translate([b[0], b[1], D - insert_depth]) cylinder(d = insert_d + 2 * insert_wall, h = insert_depth - 0.01);
+  base();
+  for (b = bosses) translate([b[0], b[1], D - insert_depth - 1]) cylinder(d = insert_d, h = insert_depth + 2);
+}
 else if (part == "outside_base") difference() {
   base();
   cube([W, H, D]);

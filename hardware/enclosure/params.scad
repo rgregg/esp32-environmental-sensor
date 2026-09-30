@@ -83,16 +83,18 @@ rj45_recess = 1.5;                      // jack face below the top wall's outer 
 H          = esp_top_y - rj45_y[0] + rj45_recess;  // outer height
 
 // ---- Hardware ----
-insert_d    = 4.0;  insert_depth = 7;   // M3 heat-set insert hole (M3x8 through a 2 mm lid needs 6)
-boss_d      = 7;
+insert_d    = 5.0;  insert_depth = 7;   // M3 heat-set insert hole: user's inserts take 5 mm (M3x8 through a 2 mm lid needs 6)
+insert_wall = 1.5;                      // minimum solid material around an insert hole
+boss_d      = insert_d + 2 * insert_wall + 0.5;   // 8.5 for a 5 mm insert hole
+boss_e      = boss_d / 2;                         // boss centre inset from the outer surfaces: bosses merge into the walls
 screw_clear = 3.4;                      // M3 clearance in lid
 pilot_d     = 1.8;  standoff_d = 4.5;   // M2 self-tapping into standoffs
 bosses = [                              // [x, y] lid screw bosses
-  [W - wall - boss_d/2, H - wall - boss_d/2],               // top-right
-  [wall + boss_d/2, (baffle_y0 + baffle_y1)/2],             // baffle left
-  [W - wall - boss_d/2, (baffle_y0 + baffle_y1)/2],         // baffle right
-  [wall + boss_d/2, wall + boss_d/2],                       // chamber bottom-left
-  [W - wall - boss_d/2, wall + boss_d/2],                   // chamber bottom-right
+  [W - boss_e, H - boss_e],                                 // top-right
+  [boss_e, (baffle_y0 + baffle_y1)/2],                      // baffle left
+  [W - boss_e, (baffle_y0 + baffle_y1)/2],                  // baffle right
+  [boss_e, boss_e],                                         // chamber bottom-left
+  [W - boss_e, boss_e],                                     // chamber bottom-right
 ];
 
 // ---- Features ----

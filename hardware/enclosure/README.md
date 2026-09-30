@@ -59,7 +59,7 @@ they differ, then re-run `./check.sh`:
 
 | Qty | Part |
 |---|---|
-| 5 | M3 heat-set insert (Ø4.0 mm hole, ≤7 mm long) |
+| 5 | M3 heat-set insert for a Ø5.0 mm hole, ≤7 mm long. For another size, set `insert_d`; the bosses resize to match. |
 | 5 | M3 × 8 button-head screw (lid) |
 | 3 | M2 × 6 self-tapping screw (board) |
 | 2 | #6 or #8 wood/drywall screw with a head ≤ 8 mm (wall) |

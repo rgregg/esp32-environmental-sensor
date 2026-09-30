@@ -23,6 +23,7 @@ expect_empty clash_base
 expect_empty clash_lid
 expect_empty clash_base_lid
 expect_empty outside_base
+expect_empty insert_walls
 # the RJ45 sits snug on the notch floor (no gap under the jack)
 expect_nonempty rj45_floor
 expect_empty outside_lid

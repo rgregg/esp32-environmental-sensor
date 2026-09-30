@@ -162,7 +162,9 @@ The four-corner screws presented in discussion don't fit: the board fills the
 full cavity width, so there is no corner space for an M3 insert boss (needs
 ≈Ø7 mm) along the board. Revised:
 
-- **Five M3 heat-set inserts** (hole Ø4.0 × 6 mm) in base bosses with
+- **Five M3 heat-set inserts** (hole Ø5.0 × 7 mm, to match the inserts on hand) in
+  Ø8.5 base bosses. The bosses are sized from the insert (≥1.5 mm of wall all round)
+  and inset by their radius so they merge into the case walls. They take
   **M3 × 8 button-head screws** whose heads sit on the lid face (a 2 mm lid is too
   thin to counterbore):
   - **Top-right** corner: the region right of the RJ45, above the board.
