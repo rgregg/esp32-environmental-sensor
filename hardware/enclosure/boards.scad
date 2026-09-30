@@ -60,7 +60,7 @@ module env_keepouts() {
       env_slot_2d();
     }
     // UEXT header + IDC plug + ribbon, which folds back over the plug top
-    box(env_hdr_x[0], env_hdr_y[0], pcb_t, env_hdr_x[1], env_hdr_y[1], pcb_t + idc_h + env_ribbon_fold);
+    box(env_hdr_x[0], env_hdr_y[0], pcb_t, env_hdr_x[1], env_hdr_y[1], env_stack_h);
   }
 }
 

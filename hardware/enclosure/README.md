@@ -39,6 +39,7 @@ they differ, then re-run `./check.sh`:
 |---|---|---|
 | Height from the PCB top to the top of the plugged-in IDC connector, plus the ribbon folded the way it will be routed. The case depth grows with it. | `idc_h` | 17.5 mm |
 | Your micro-USB cable's plug overmold (width × thickness) | `usb_plug_w`, `usb_plug_h` | 11 × 7.5 mm |
+| MOD-ENV: from the bottom of its PCB to the top of the plugged-in, routed ribbon. This sets the lid rib. | `env_stack_h` | 20.5 mm (measured) |
 | Board revision (printed on the PCB) | — | Rev J–N1 |
 | Which side of the MOD-ENV's UEXT header the key faces | — | route the ribbon to match pin 1 |
 
