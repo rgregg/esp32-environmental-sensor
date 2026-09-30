@@ -34,8 +34,9 @@ module lid_assembled() {
       // reset guide tube
       translate([rst[0], rst[1], tube_bottom]) cylinder(d = reset_tube_od, h = D - tube_bottom);
       // rib that stops the MOD-ENV IDC plug backing out
-      translate([W / 2 - 8.5, env_y1 - (env_hdr_y[0] + env_hdr_y[1]) / 2 - 1.5, env_z + pcb_t + idc_h + tol])
-        cube([17, 3, D - (env_z + pcb_t + idc_h + tol)]);
+      rib_z = env_z + pcb_t + idc_h + env_ribbon_fold + tol;   // just clear of the folded ribbon
+      translate([W / 2 - 8.5, env_y1 - (env_hdr_y[0] + env_hdr_y[1]) / 2 - 1.5, rib_z])
+        cube([17, 3, D - rib_z]);
       lid_slack_clips();
     }
     // screw clearance holes

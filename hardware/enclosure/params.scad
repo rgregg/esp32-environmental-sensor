@@ -30,6 +30,7 @@ usb_cy  = 35.5;
 usb_plug_w = 11.0;  usb_plug_h = 7.5;   // overmolded micro-USB plug envelope
 uext_x  = [3.83, 24.15];   uext_y = [59.37, 68.26];
 idc_h   = 17.5;            // header + IDC plug + ribbon above PCB top (ESTIMATE: verify with calipers)
+env_ribbon_fold = 1.0;     // MOD-ENV end: ribbon folds back over the plug top toward the baffle notch (ESTIMATE)
 rst_xy  = [2.17, 88.33];   btn_h  = 2.0;
 wroom_x = [4.99, 22.99];   wroom_y = [78.96, 104.46];  wroom_h = 3.25;
 blanket_h  = 3.25;         // general small-component envelope over the whole board
