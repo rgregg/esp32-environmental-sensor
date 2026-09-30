@@ -26,6 +26,9 @@ bool onConfigChanged() {
 
 void setup() {
   Serial.begin(115200);
+  // Ethernet-only telemetry doesn't need 240 MHz; 80 MHz runs the board cooler,
+  // which keeps its heat away from the sensor chamber.
+  setCpuFrequencyMhz(80);
   delay(200);
   esp_task_wdt_config_t wdt = { .timeout_ms = 30000, .idle_core_mask = 0, .trigger_panic = true };
   if (esp_task_wdt_init(&wdt) == ESP_ERR_INVALID_STATE) esp_task_wdt_reconfigure(&wdt);

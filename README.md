@@ -144,7 +144,14 @@ pio test -e native
 
 - The CCS811 (MOD-ENV) needs ~20 minutes of warm-up and a longer burn-in before
   its eCO₂/TVOC readings are trustworthy — early values reading oddly is expected,
-  not a fault.
+  not a fault. It runs in drive mode 3 (one measurement a minute), so the first
+  eCO₂/TVOC values appear a few minutes after boot and then update once a minute.
+- Self-heating is kept down deliberately. The CCS811's hotplate sits next to the
+  BME280 on the same module, the BME280 itself warms up if it samples continuously,
+  and the ESP32 is a heat source too. So the CCS811 is pulsed, the BME280 uses
+  forced mode (one conversion per read, no oversampling), and the CPU runs at
+  80 MHz. Measured in the printed enclosure against a reference thermometer, this
+  cut the temperature offset from about +2.9 °C to about +0.75 °C.
 
 ## Project status
 
