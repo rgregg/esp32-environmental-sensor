@@ -3,11 +3,14 @@ include <params.scad>
 use <boards.scad>
 
 module lid_slack_clips() {
-  // Two bridges under the lid over the WROOM area; the surplus ribbon is
-  // Z-folded between the lid and the bars.
-  for (y = [H - 105, H - 87]) {
-    for (x = [8, 24]) translate([x, y, D - 7]) cube([1.5, 2, 7]);
-    translate([8, y, D - 7]) cube([17.5, 2, 1.5]);
+  // Two loops under the lid over the WROOM end. The ribbon's free end, connector
+  // and all, threads through both; the surplus is Z-folded between lid and bars.
+  x0 = W / 2 - clip_open[0] / 2;          // opening, case frame
+  z0 = D - clip_open[1];                  // top of the bar
+  for (y = clip_y) {
+    for (x = [x0 - clip_post, x0 + clip_open[0]])
+      translate([x, y, z0 - clip_bar_t]) cube([clip_post, clip_w, clip_open[1] + clip_bar_t]);
+    translate([x0 - clip_post, y, z0 - clip_bar_t]) cube([clip_open[0] + 2 * clip_post, clip_w, clip_bar_t]);
   }
 }
 

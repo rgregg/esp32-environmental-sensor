@@ -31,6 +31,7 @@ usb_plug_w = 11.0;  usb_plug_h = 7.5;   // overmolded micro-USB plug envelope
 uext_x  = [3.83, 24.15];   uext_y = [59.37, 68.26];
 idc_h   = 17.5;            // header + IDC plug + ribbon above PCB top (ESTIMATE: verify with calipers)
 env_stack_h = 20.5;        // MOD-ENV PCB bottom to top of the inserted, routed ribbon (MEASURED 2026-09-29)
+idc_head = [18, 11];       // ribbon connector incl. folded cable, width x thickness (MEASURED 2026-09-29)
 rst_xy  = [2.17, 88.33];   btn_h  = 2.0;
 wroom_x = [4.99, 22.99];   wroom_y = [78.96, 104.46];  wroom_h = 3.25;
 blanket_h  = 3.25;         // general small-component envelope over the whole board
@@ -103,6 +104,9 @@ ribbon_notch_w = 14;  ribbon_gap = 2;   // baffle notch width; ribbon gap under 
 reset_hole_d = 2;  reset_tube_od = 5;  reset_tube_clear = 1.5;
 ear_w = 16;  ear_h = 18;  ear_t = 3;
 key_entry_d = 8.5;  key_slot_w = 4.2;  key_slot_len = 7;
+clip_y     = [H - 105, H - 87];         // slack-loop positions (over the WROOM end)
+clip_open  = [idc_head[0] + 2, idc_head[1] + 2];  // loop opening (w, depth): connector + 1 mm each side
+clip_post  = 2.5;  clip_bar_t = 1.5;  clip_w = 2.5;   // post/bar section; loop thickness along y
 
 // ---- Fit test (quick print: standoffs, RJ45 notch, USB opening) ----
 fit_y0    = 66;    // slice starts just below the lower standoffs

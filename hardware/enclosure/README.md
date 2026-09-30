@@ -73,8 +73,9 @@ they differ, then re-run `./check.sh`:
    in the top notch. Do this before plugging in the ribbon, which would otherwise lie
    over the two lower screw holes.
 3. Plug the ribbon into the ESP32-POE-ISO's UEXT header.
-4. Thread the ribbon's free end under the two clip bars on the inside of the lid. Each
-   clip is a closed loop, so the end has to go through first.
+4. Thread the ribbon's free end, connector first, through the two loops on the inside
+   of the lid. Each loop opens 20 × 13 mm, sized to pass the measured 18 × 11 mm
+   connector (`idc_head`).
 5. Lay the ribbon through the notch in the baffle and plug it into the MOD-ENV. Seat
    the MOD-ENV over the peg in the bottom chamber: components facing out, UEXT header
    up, sensors toward the bottom vents. Z-fold the slack between the lid and the clip

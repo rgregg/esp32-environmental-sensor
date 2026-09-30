@@ -127,15 +127,14 @@ the RJ45 sits left of centre at the top.
   jack's through-hole leads occupy the space under that end, and mounting hole
   MH1 is only 2.7 mm from the jack end, so plug force is already carried by a
   screw.)*
-- **Ribbon slack pocket:** two clip bars hanging from the lid underside over the
-  lower main compartment (the ESP32 module region, where there is ≈15 mm of free
-  height above the 3.1 mm module), each a bridge on two posts about 5.5 mm below
-  the lid. The space between the lid and the bars holds the ≈70 mm of
-  surplus ribbon Z-folded in up to 4 layers. Ribbon path: board UEXT plug → up
-  and over → pocket → baffle notch → sensor chamber.
-
-### 3. Baffle
-
+- **Ribbon slack pocket:** two loops hanging from the lid underside over the
+  lower main compartment (the ESP32 module region). Each loop opens 20 × 13 mm,
+  large enough for the ribbon's measured 18 × 11 mm connector to pass through,
+  because the free end has to be threaded before it's plugged into the MOD-ENV.
+  The bar sits 1.6 mm above the module. Surplus ribbon is Z-folded between the
+  lid and the bars. Ribbon path: board UEXT plug → loops → baffle notch →
+  sensor chamber. *(Changed after assembly: the first loops, 14.5 × 5.5 mm, were
+  too small for the connector.)*
 - A **double wall with a 3 mm air gap** spanning the full cavity width, between
   the main compartment and the sensor chamber, sitting below the antenna
   overhang with ≥1.5 mm clearance.

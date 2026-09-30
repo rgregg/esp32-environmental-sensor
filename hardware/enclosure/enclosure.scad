@@ -48,6 +48,12 @@ else if (part == "fit_wall_slivers") intersection() {
 else if (part == "fit_thin") thin_regions(max(fit_h, fit_usb_h), min_feature) fit_test();
 else if (part == "fit_unsupported") unsupported_regions(max(fit_h, fit_usb_h)) fit_test();
 else if (part == "outside_fit") difference() { fit_test(); cube([W, H, D]); }
+// the ribbon connector must pass through both slack loops
+else if (part == "clip_passage") intersection() {
+  lid_assembled();
+  translate([W / 2 - idc_head[0] / 2 - tol, clip_y[0] - 5, D - idc_head[1] - tol])
+    cube([idc_head[0] + 2 * tol, clip_y[1] - clip_y[0] + 15, idc_head[1] + tol - 0.01]);
+}
 else if (part == "outside_lid") difference() { lid_assembled(); cube([W, H, D + lid_t]); }
 // must render NON-empty: proves the clash test can detect an overlap
 else if (part == "clash_selftest") intersection() { cube([W, H, D]); board_keepouts(); }

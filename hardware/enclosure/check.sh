@@ -26,6 +26,7 @@ expect_empty outside_base
 # the RJ45 sits snug on the notch floor (no gap under the jack)
 expect_nonempty rj45_floor
 expect_empty outside_lid
+expect_empty clip_passage
 # a measured IDC plug taller than the estimate must still fit (lid depth grows)
 expect_empty clash_lid -D idc_h=21
 expect_empty clash_base_lid -D idc_h=21
