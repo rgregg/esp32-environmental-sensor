@@ -1,3 +1,5 @@
 .pio/
 .vscode/
 *.bin
+hardware/enclosure/build/
+__pycache__/

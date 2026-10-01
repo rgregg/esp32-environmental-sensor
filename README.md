@@ -20,6 +20,13 @@ physical access required after the initial flash.
 Swap MOD-BME280 for MOD-ENV (or run either alone) with no config change — the
 firmware probes the bus and publishes whatever sensors are present.
 
+## Enclosure
+
+A 3D-printable, wall-mount PETG enclosure (parametric OpenSCAD) that holds the board and
+the MOD-ENV in an isolated, vented sensor chamber lives in
+[`hardware/enclosure/`](hardware/enclosure/README.md), with build, print and assembly
+instructions.
+
 ## Toolchain
 
 PlatformIO with the **pioarduino** platform (arduino-esp32 **core 3.x / ESP-IDF 5.x**).
