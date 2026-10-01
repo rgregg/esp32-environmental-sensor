@@ -2,8 +2,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-// The CCS811 produces a new sample once per second (drive mode 1), so there is
-// no point touching the bus more often than that.
+// Poll once per second: the BME280 takes one forced conversion per poll, and the
+// CCS811 (drive mode 3) reports a new sample once a minute, picked up when ready.
 static constexpr uint32_t kReadIntervalMs = 1000;
 
 void SensorManager::begin() {

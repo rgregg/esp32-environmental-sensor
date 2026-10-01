@@ -2,6 +2,10 @@
 
 bool Ccs811Sensor::begin() {
   present_ = dev_.begin(0x5A);
+  // Pulse the hotplate once a minute (drive mode 3) instead of continuously
+  // (mode 1): the constant heater warmed the BME280 on the same module by ~1.8 °C
+  // inside the enclosure. eCO2/TVOC then update once a minute.
+  if (present_) dev_.setDriveMode(CCS811_DRIVE_MODE_60SEC);
   return present_;
 }
 
